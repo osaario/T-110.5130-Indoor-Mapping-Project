@@ -8,7 +8,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
+import java.util.Observable;
+import java.util.concurrent.TimeUnit;
+
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
 
 public class MainActivity extends AppCompatActivity {
@@ -19,6 +26,34 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        final TextView helloView = (TextView) findViewById(R.id.hello_text_view);
+        rx.Observable.interval(500, TimeUnit.MILLISECONDS).map(new Func1<Long, Long>() {
+            @Override
+            public Long call(Long aLong) {
+                return aLong * 100;
+            }
+        }).filter(new Func1<Long, Boolean>() {
+            @Override
+            public Boolean call(Long aLong) {
+                return aLong > 300;
+            }
+        }).take(1).observeOn(AndroidSchedulers.mainThread()).doOnNext(new Action1<Long>() {
+            @Override
+            public void call(Long aLong) {
+                helloView.setText("Start load");
+            }
+        }).flatMap(new Func1<Long, rx.Observable<Long>>() {
+            @Override
+            public rx.Observable<Long> call(Long aLong) {
+                return rx.Observable.interval(5000, 0, TimeUnit.MILLISECONDS).take(1);
+            }
+        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Long>() {
+            @Override
+            public void call(Long aLong) {
+                helloView.setText(aLong + "");
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
