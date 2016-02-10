@@ -6,9 +6,39 @@ Project Plan
 ------------
 
 ## 1. Introduction
+<!---
+Give a brief overview of the system to be developed, motivation for its
+development, the environment where it will be used, and possibly the types
+of users for the system.
+-->
 
-Give a brief overview of the system to be developed, motivation for its development, the environment where it will be used, and possibly the types of users for the system.
+Mobile devices can be used to collect sensor data for construction of indoor
+navigation systems. One such system is iMoon*.
+It creates a navigation mesh from collected visual and inertial sensor data.
+A user can then be located and guided based on an image captured with
+their mobile device.
 
+Mesh creation algorithms, as well as user locating algorithms,
+are studied for improvement. Good algorithms can even cope with incompleteness
+in the collected sensor data. Nevertheless, accuracy and completeness
+of the source data are requirements to provide high quality indoor
+navigation in the previously described systems.
+
+This project develops a data collection application for indoor navigation
+systems. A person mapping an indoor area will use the application to record
+sensor data as accurately as her device can provide. Furthermore, the
+application should assist the mapper by visualizing the collected data
+and providing note keeping capabilities. This enables the mapper to verify
+and manually correct the result that the device with its limitations
+provides. The same properties will allow appending new sensor data to an
+existing collection. The collected data is stored in a cloud. A mapped area
+can be exported for use in the iMoon system.
+
+The first version of the application is targeting researchers and property
+owners that want to map their areas for enabling indoor navigation services.
+Later on, there are possibilities to develop support for crowdsourcing.
+
+\* Dong, J., Xiao, Y., Noreikis, M., Ou, Z., & Ylä-Jääski, A. (2015, November). imoon: Using smartphones for image-based indoor navigation. In Proceedings of the 13th ACM Conference on Embedded Networked Sensor Systems (pp. 85-97). ACM.
 
 ## 2. Stakeholders and staffing
 
