@@ -1,6 +1,4 @@
 T-110.5130-Indoor-Mapping-Project
-* 47983K Teemu Lehtinen
-* TODO
 
 Project Plan
 ------------
@@ -13,7 +11,7 @@ of users for the system.
 -->
 
 Mobile devices can be used to collect sensor data for construction of indoor
-navigation systems. One such system is iMoon*.
+navigation systems. One such system is iMoon.*
 It creates a navigation mesh from collected visual and inertial sensor data.
 A user can then be located and guided based on an image captured with
 their mobile device.
