@@ -30,6 +30,7 @@ import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
 public class MainActivity extends AppCompatActivity {
 
     SurfaceHolder surfaceHolder;
+    Pair<Integer, Integer> location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
                 surfaceHolder.addCallback(new SurfaceHolder.Callback() {
                     @Override
                     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+                        Canvas canvas = surfaceHolder.lockCanvas();
+                        location = new Pair<Integer, Integer>(canvas.getWidth() / 2, canvas.getHeight() / 2);
+                        surfaceHolder.unlockCanvasAndPost(canvas);
                         subscriber.onNext(surfaceHolder);
                     }
 
@@ -77,15 +81,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(Pair<SurfaceHolder, Long> surfaceHolderLongPair) {
                 SurfaceHolder holder = surfaceHolderLongPair.first;
-                Long step = surfaceHolderLongPair.second;
+
                 Canvas canvas = holder.lockCanvas();
                 canvas.drawColor(Color.WHITE);
+
                 Paint paint = new Paint();
                 paint.setStyle(Paint.Style.FILL);
                 paint.setColor(Color.RED);
-                Log.d("main", "y: " + (canvas.getHeight()/2 + step));
-                canvas.drawCircle(canvas.getWidth()/2, canvas.getHeight()/2+step, 100, paint);
-                Log.d("main", "width " + canvas.getWidth() + " height " + canvas.getHeight());
+
+                location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
+                canvas.drawCircle(location.first, location.second, 80, paint);
                 holder.unlockCanvasAndPost(canvas);
             }
         });
@@ -126,8 +131,6 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
-        DeadReckoning.calculatePositionDelta();
     }
 
     @Override
