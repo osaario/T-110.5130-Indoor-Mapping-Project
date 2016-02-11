@@ -3,7 +3,7 @@ T-110.5130-Indoor-Mapping-Project
 Project Plan
 ------------
 
-## 1. Introduction
+### 1. Introduction
 <!---
 Give a brief overview of the system to be developed, motivation for its
 development, the environment where it will be used, and possibly the types
@@ -38,17 +38,17 @@ Later on, there are possibilities to develop support for crowdsourcing.
 
 \* Dong, J., Xiao, Y., Noreikis, M., Ou, Z., & Ylä-Jääski, A. (2015, November). imoon: Using smartphones for image-based indoor navigation. In Proceedings of the 13th ACM Conference on Embedded Networked Sensor Systems (pp. 85-97). ACM.
 
-## 2. Stakeholders and staffing
+### 2. Stakeholders and staffing
 
 Present the stakeholders of the project and list all group members along with their contact information. You may assign roles (such as project manager) to the group members and/or list the relevant interests or skills of the group members.
 
 
-## 3. Goals and scope
+### 3. Goals and scope
 
 This section describes the goals of the project group and the individual learning goals of the group members. Define the scope of the project. You may also include the business goals of the system, and describe the benefits it provides to different stakeholders, including the users.
 
 
-## 4. Work practices and tools
+### 4. Work practices and tools
 
 Describe all planned work practices in a concrete but concise way. How the practice is used, what tasks/meetings/materials etc. are needed, who is responsible of what etc. In addition, list all the tools you plan to use, and describe the required development and test environments.
 
@@ -63,12 +63,12 @@ Possible sub-topics (ask the tutor what are relevant for your project):
 * Tools (Summary of all tools used. Mention version numbers and availability information, if relevant to the project. Description of all development and test environments that are needed; both software and hardware environments.)
 
 
-## 5. Schedule and resources
+### 5. Schedule and resources
 
 Design an initial schedule for the project. Consider whether you want to split the project into iterations. Allocate 120 hours per each group member for the project (5 credits * 27 hours / credit - 15 hours for lectures, etc. = 120 hours). In addition, consider any material hardware or software resources used in the project.
 
 
-## 6. System overview
+### 6. System overview
 
 This chapter is a high level description of the intended solution (= the system). It typically includes
 
@@ -76,11 +76,11 @@ This chapter is a high level description of the intended solution (= the system)
 * short textual description of the system
 
 
-## 7. Requirements
+### 7. Requirements
 
 Define the functional and non-functional requirements of the system.
 
 
-## 8. Risk management
+### 8. Risk management
 
 Identify risks in the project as well as their impact and probability. For example – what happens if one of the group members decides to quit the course? Discuss the tools or methods to either avoid these risks completely or to minimize the impact on the project if they occur. You don’t have to identify all the possible risks, just concentrate on the most significant ones due to their probability or impact.
