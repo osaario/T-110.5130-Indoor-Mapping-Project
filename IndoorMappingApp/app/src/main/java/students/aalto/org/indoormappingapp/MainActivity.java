@@ -1,5 +1,7 @@
 package students.aalto.org.indoormappingapp;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -101,15 +103,18 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.d("main", "surface created");
+        Canvas canvas = holder.lockCanvas();
+        canvas.drawColor(Color.WHITE);
+        holder.unlockCanvasAndPost(canvas);
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
+        // Should not happen.
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-
+        // Not interesting.
     }
 }
