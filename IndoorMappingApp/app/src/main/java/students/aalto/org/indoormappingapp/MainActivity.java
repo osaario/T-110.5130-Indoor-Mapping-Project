@@ -5,6 +5,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +21,9 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
+
+    SurfaceHolder surfaceHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +32,11 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final TextView helloView = (TextView) findViewById(R.id.hello_text_view);
+        final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
+        surfaceHolder = surfaceView.getHolder();
+        surfaceHolder.addCallback(this);
+
+        /*final TextView helloView = (TextView) findViewById(R.id.hello_text_view);
         rx.Observable.interval(500, TimeUnit.MILLISECONDS).map(new Func1<Long, Long>() {
             @Override
             public Long call(Long aLong) {
@@ -53,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             public void call(Long aLong) {
                 helloView.setText(aLong + "");
             }
-        });
+        });*/
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -87,5 +96,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        Log.d("main", "surface created");
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+
     }
 }
