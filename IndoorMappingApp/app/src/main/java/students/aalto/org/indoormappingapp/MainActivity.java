@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -18,12 +19,14 @@ import android.widget.TextView;
 import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
 
-public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
+public class MainActivity extends AppCompatActivity {
 
     SurfaceHolder surfaceHolder;
 
@@ -36,7 +39,48 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
         surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback(this);
+        rx.Observable<SurfaceHolder> surfaceObservable = rx.Observable.create(new rx.Observable.OnSubscribe<SurfaceHolder>() {
+            @Override
+            public void call(final Subscriber<? super SurfaceHolder> subscriber) {
+                surfaceHolder.addCallback(new SurfaceHolder.Callback() {
+                    @Override
+                    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+                        subscriber.onNext(surfaceHolder);
+                    }
+
+                    @Override
+                    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+                    }
+
+                    @Override
+                    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+                        subscriber.onNext(null);
+                    }
+                });
+            }
+        });
+        
+        rx.Observable<Long> pulseObs = rx.Observable.interval(100, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread());
+
+        rx.Observable.combineLatest(surfaceObservable, pulseObs, new Func2<SurfaceHolder, Long, Pair<SurfaceHolder, Long>>() {
+            @Override
+            public Pair<SurfaceHolder, Long> call(SurfaceHolder surfaceHolder, Long integer) {
+                return new Pair<SurfaceHolder, Long>(surfaceHolder, integer);
+            }
+        }).filter(new Func1<Pair<SurfaceHolder, Long>, Boolean>() {
+            @Override
+            public Boolean call(Pair<SurfaceHolder, Long> surfaceHolderLongPair) {
+                return surfaceHolderLongPair.first != null;
+            }
+        }).subscribe(new Action1<Pair<SurfaceHolder, Long>>() {
+            @Override
+            public void call(Pair<SurfaceHolder, Long> surfaceHolderLongPair) {
+                SurfaceHolder holder = surfaceHolderLongPair.first;
+                Canvas canvas = holder.lockCanvas();
+                canvas.drawColor(Color.WHITE);
+                holder.unlockCanvasAndPost(canvas);
+            }
+        });
 
         /*final TextView helloView = (TextView) findViewById(R.id.hello_text_view);
         rx.Observable.interval(500, TimeUnit.MILLISECONDS).map(new Func1<Long, Long>() {
@@ -100,21 +144,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        Log.d("main", "surface created");
-        Canvas canvas = holder.lockCanvas();
-        canvas.drawColor(Color.WHITE);
-        holder.unlockCanvasAndPost(canvas);
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        // Should not happen.
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        // Not interesting.
-    }
+    /*
+        */
 }
