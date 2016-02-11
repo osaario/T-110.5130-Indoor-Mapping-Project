@@ -2,6 +2,7 @@ package students.aalto.org.indoormappingapp;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -76,8 +77,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(Pair<SurfaceHolder, Long> surfaceHolderLongPair) {
                 SurfaceHolder holder = surfaceHolderLongPair.first;
+                Long step = surfaceHolderLongPair.second;
                 Canvas canvas = holder.lockCanvas();
                 canvas.drawColor(Color.WHITE);
+                Paint paint = new Paint();
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(Color.RED);
+                Log.d("main", "y: " + (canvas.getHeight()/2 + step));
+                canvas.drawCircle(canvas.getWidth()/2, canvas.getHeight()/2+step, 100, paint);
+                Log.d("main", "width " + canvas.getWidth() + " height " + canvas.getHeight());
                 holder.unlockCanvasAndPost(canvas);
             }
         });
