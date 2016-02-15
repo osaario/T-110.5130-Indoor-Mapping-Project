@@ -1,8 +1,11 @@
 package students.aalto.org.indoormappingapp;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,8 +18,12 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.util.List;
 import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
 
     SurfaceHolder surfaceHolder;
     Pair<Integer, Integer> location;
+    SensorManager smm;
+    List<Sensor> sensor;
+    Spinner lv;
+    String[] data = {"one", "two", "three", "four", "five"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +51,13 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
+        smm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        lv = (Spinner) findViewById(R.id.spinner1);
+        sensor = smm.getSensorList(Sensor.TYPE_ALL);
+        lv.setAdapter(new ArrayAdapter<Sensor>(this, android.R.layout.simple_list_item_1,  sensor));
+
         surfaceHolder = surfaceView.getHolder();
+
         rx.Observable<SurfaceHolder> surfaceObservable = rx.Observable.create(new rx.Observable.OnSubscribe<SurfaceHolder>() {
             @Override
             public void call(final Subscriber<? super SurfaceHolder> subscriber) {

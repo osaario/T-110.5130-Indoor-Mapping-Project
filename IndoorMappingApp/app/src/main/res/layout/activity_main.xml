@@ -15,9 +15,21 @@
 
     </android.support.design.widget.AppBarLayout>
 
+
+
     <SurfaceView android:id="@+id/main_map"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <Spinner
+        android:id="@+id/spinner1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:layout_marginLeft="100dp"
+        android:spinnerMode="dropdown">
+    </Spinner>
+
 
     <android.support.design.widget.FloatingActionButton android:id="@+id/fab"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
