@@ -45,7 +45,7 @@ Present the stakeholders of the project and list all group members along with th
 
 ### 3. Goals and scope
 
---- 
+---
 
 This section describes the goals of the project group and the individual learning goals of the group members. Define the scope of the project. You may also include the business goals of the system, and describe the benefits it provides to different stakeholders, including the users.
 
@@ -101,6 +101,10 @@ Possible sub-topics (ask the tutor what are relevant for your project):
 
 ---
 
+
+There will be regular meetings. The agenda includes reviewing the latest status of the projects and planning the next steps. Most of each task will be done individually by each team member.
+
+
 Time tracking:
 - Use trello as a backlog
 - Tasks created by the project leader
@@ -111,6 +115,7 @@ Documenting:
 
 Communication:
 - To be decided with the stakeholders
+- Telegram
 
 Version control:
 - Git
@@ -140,10 +145,15 @@ Design an initial schedule for the project. Consider whether you want to split t
 ### 6. System overview
 
 This chapter is a high level description of the intended solution (= the system). It typically includes
-
+z
 * a graph (for example a use case diagram) that defines user groups and the main functions of the system
 * short textual description of the system
 
+
+---
+
+The system is an Android application to collect the necessary information including pictures for the indoor mapping system. The mentioned information is gathered from the Android sensors and it will be sent to server.
+![My image](http://s11.postimg.org/t38tdxmhv/Use_Cases.png)
 
 ### 7. Requirements
 
