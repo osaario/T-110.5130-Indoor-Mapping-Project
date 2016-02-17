@@ -45,7 +45,43 @@ Present the stakeholders of the project and list all group members along with th
 
 ### 3. Goals and scope
 
+--- 
+
 This section describes the goals of the project group and the individual learning goals of the group members. Define the scope of the project. You may also include the business goals of the system, and describe the benefits it provides to different stakeholders, including the users.
+
+---
+
+Business goal:
+- Reduce the stakeholders' effort to gather data for the iMoon system.
+
+Group learning goals:
+- Teamwork and collaboration skills
+- Producing an end to end product in schedule
+
+
+Individual learning goals for project leader Olli-Matti Saario:
+
+- Management and facilitation of a software team
+- Techonolgy decision making in a team project with members of different professional backgrounds
+- Communication between project management and stakeholders
+- Web backend development
+
+Individual learning goals for Teemu Lehtinen:
+
+- Android development
+- ReactiveX driven UI-programming
+- Sensors in mobile devices
+
+Individual learning goals for Kirill Ermolov:
+
+- Android development
+- Algorithms development in Java
+- ReactiveX programming
+
+Inidividual learning goals for Mehrad Mohammedi:
+
+- Android development
+- Canvas based drawing in Android
 
 
 ### 4. Work practices and tools
