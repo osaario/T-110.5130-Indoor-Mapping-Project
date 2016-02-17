@@ -86,6 +86,7 @@ Inidividual learning goals for Mehrad Mohammedi:
 
 ### 4. Work practices and tools
 
+---
 Describe all planned work practices in a concrete but concise way. How the practice is used, what tasks/meetings/materials etc. are needed, who is responsible of what etc. In addition, list all the tools you plan to use, and describe the required development and test environments.
 
 Possible sub-topics (ask the tutor what are relevant for your project):
@@ -97,6 +98,38 @@ Possible sub-topics (ask the tutor what are relevant for your project):
 * Design (How architectural design and lower level design is done? Modeling tools used? Validation?)
 * Quality assurance (quality goals, QA practices, …)
 * Tools (Summary of all tools used. Mention version numbers and availability information, if relevant to the project. Description of all development and test environments that are needed; both software and hardware environments.)
+
+---
+
+Time tracking:
+- Use trello as a backlog
+- Tasks created by the project leader
+
+Documenting:
+- Google docs
+- Documents can be shared to stakeholders in the cloud (Discussion on what the stakeholders' prefer?)
+
+Communication:
+- To be decided with the stakeholders
+
+Version control:
+- Git
+- Pull requests and feature branches
+
+Design:
+
+- Standard Android MVC architecure pattern with Reactive data flow
+- No modeling tools needed
+
+QA:
+
+- Unit tests for algorithms
+- Ad-hoc testing for UI
+
+Tools:
+
+- Android studio with Gradle build system
+- Real life test devices since emulators lack relevant sensor data
 
 
 ### 5. Schedule and resources
