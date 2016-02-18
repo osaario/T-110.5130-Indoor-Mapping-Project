@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -20,12 +22,9 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import java.util.List;
-import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
 import rx.Subscriber;
@@ -34,15 +33,12 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
+import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
     SurfaceHolder mSurfaceHolder;
     Pair<Integer, Integer> location;
-    SensorManager smm;
-    List<Sensor> sensor;
-    Spinner lv;
-    String[] data = {"one", "two", "three", "four", "five"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,27 +48,22 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
-        smm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        lv = (Spinner) findViewById(R.id.spinner1);
-        sensor = smm.getSensorList(Sensor.TYPE_ALL);
-        lv.setAdapter(new ArrayAdapter<Sensor>(this, android.R.layout.simple_list_item_1,  sensor));
 
         mSurfaceHolder = surfaceView.getHolder();
 
-        rx.Observable<SurfaceHolder> surfaceObservable = rx.Observable.create(new rx.Observable.OnSubscribe<SurfaceHolder>() {
-            @Override
-            public void call(final Subscriber<? super SurfaceHolder> subscriber) {
                 mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
                     @Override
                     public void surfaceCreated(SurfaceHolder surfaceHolder) {
                         Canvas canvas = surfaceHolder.lockCanvas();
+                        canvas.drawColor(Color.WHITE);
                         location = new Pair<Integer, Integer>(canvas.getWidth() / 2, canvas.getHeight() / 2);
                         surfaceHolder.unlockCanvasAndPost(canvas);
-                        subscriber.onNext(surfaceHolder);
+                        mSurfaceHolder = surfaceHolder;
                     }
 
                     @Override
                     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+                        mSurfaceHolder = surfaceHolder;
                     }
 
                     @Override
@@ -80,20 +71,18 @@ public class MainActivity extends AppCompatActivity {
                         mSurfaceHolder = null;
                     }
                 });
-            }
-        });
-        
-        rx.Observable<Long> pulseObs = rx.Observable.interval(100, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread());
 
-        rx.Observable.combineLatest(surfaceObservable, pulseObs, new Func2<SurfaceHolder, Long, Pair<SurfaceHolder, Long>>() {
+        SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
+        sensors.stepObservable.scan(new Func2<Integer, Integer, Integer>() {
             @Override
-            public Pair<SurfaceHolder, Long> call(SurfaceHolder surfaceHolder, Long integer) {
-                return new Pair<SurfaceHolder, Long>(surfaceHolder, integer);
+            public Integer call(Integer integer, Integer integer2) {
+                return integer + integer2;
             }
-        }).subscribe(new Action1<Pair<SurfaceHolder, Long>>() {
+        }).subscribe(new Action1<Integer>() {
             @Override
-            public void call(Pair<SurfaceHolder, Long> surfaceHolderLongPair) {
-                if(mSurfaceHolder == null) return;
+            public void call(Integer surfaceHolderLongPair) {
+                if (mSurfaceHolder == null) return;
+
                 Canvas canvas = mSurfaceHolder.lockCanvas();
                 canvas.drawColor(Color.WHITE);
 
@@ -101,8 +90,8 @@ public class MainActivity extends AppCompatActivity {
                 paint.setStyle(Paint.Style.FILL);
                 paint.setColor(Color.RED);
 
-                location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
-                canvas.drawCircle(location.first, location.second, 80, paint);
+                //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
+                canvas.drawCircle(location.first, location.second + surfaceHolderLongPair * 10, 80, paint);
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
             }
         });
@@ -146,6 +135,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -170,6 +169,4 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /*
-        */
 }
