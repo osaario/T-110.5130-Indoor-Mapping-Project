@@ -36,7 +36,7 @@ import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
 
 public class MainActivity extends AppCompatActivity {
 
-    SurfaceHolder surfaceHolder;
+    SurfaceHolder mSurfaceHolder;
     Pair<Integer, Integer> location;
     SensorManager smm;
     List<Sensor> sensor;
@@ -56,12 +56,12 @@ public class MainActivity extends AppCompatActivity {
         sensor = smm.getSensorList(Sensor.TYPE_ALL);
         lv.setAdapter(new ArrayAdapter<Sensor>(this, android.R.layout.simple_list_item_1,  sensor));
 
-        surfaceHolder = surfaceView.getHolder();
+        mSurfaceHolder = surfaceView.getHolder();
 
         rx.Observable<SurfaceHolder> surfaceObservable = rx.Observable.create(new rx.Observable.OnSubscribe<SurfaceHolder>() {
             @Override
             public void call(final Subscriber<? super SurfaceHolder> subscriber) {
-                surfaceHolder.addCallback(new SurfaceHolder.Callback() {
+                mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
                     @Override
                     public void surfaceCreated(SurfaceHolder surfaceHolder) {
                         Canvas canvas = surfaceHolder.lockCanvas();
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-                        subscriber.onNext(null);
+                        mSurfaceHolder = null;
                     }
                 });
             }
@@ -89,17 +89,11 @@ public class MainActivity extends AppCompatActivity {
             public Pair<SurfaceHolder, Long> call(SurfaceHolder surfaceHolder, Long integer) {
                 return new Pair<SurfaceHolder, Long>(surfaceHolder, integer);
             }
-        }).filter(new Func1<Pair<SurfaceHolder, Long>, Boolean>() {
-            @Override
-            public Boolean call(Pair<SurfaceHolder, Long> surfaceHolderLongPair) {
-                return surfaceHolderLongPair.first != null;
-            }
         }).subscribe(new Action1<Pair<SurfaceHolder, Long>>() {
             @Override
             public void call(Pair<SurfaceHolder, Long> surfaceHolderLongPair) {
-                SurfaceHolder holder = surfaceHolderLongPair.first;
-
-                Canvas canvas = holder.lockCanvas();
+                if(mSurfaceHolder == null) return;
+                Canvas canvas = mSurfaceHolder.lockCanvas();
                 canvas.drawColor(Color.WHITE);
 
                 Paint paint = new Paint();
@@ -108,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
                 location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
                 canvas.drawCircle(location.first, location.second, 80, paint);
-                holder.unlockCanvasAndPost(canvas);
+                mSurfaceHolder.unlockCanvasAndPost(canvas);
             }
         });
 
