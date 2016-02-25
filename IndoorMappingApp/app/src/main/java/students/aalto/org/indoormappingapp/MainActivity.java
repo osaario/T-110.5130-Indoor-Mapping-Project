@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mSurfaceHolder == null) return;
 
                 Canvas canvas = mSurfaceHolder.lockCanvas();
+                if(canvas == null) return;
                 canvas.drawColor(Color.WHITE);
 
                 Paint paint = new Paint();

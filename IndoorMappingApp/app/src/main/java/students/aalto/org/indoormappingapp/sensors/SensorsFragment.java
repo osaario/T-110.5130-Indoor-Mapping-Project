@@ -102,6 +102,10 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER)
+        {
+            stepSubject.onNext(1);
+        }
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
         {
             accelerometerSubject.onNext(event.values);
