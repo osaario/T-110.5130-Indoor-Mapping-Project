@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +41,7 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
+import students.aalto.org.indoormappingapp.model.MapPosition;
 import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -83,14 +85,21 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
+
         sensors.stepObservable.scan(new Func2<Integer, Integer, Integer>() {
             @Override
             public Integer call(Integer integer, Integer integer2) {
                 return integer + integer2;
             }
-        }).subscribe(new Action1<Integer>() {
+        }).scan(new ArrayList<MapPosition>(), new Func2<ArrayList<MapPosition>, Integer, ArrayList<MapPosition>>() {
             @Override
-            public void call(Integer surfaceHolderLongPair) {
+            public ArrayList<MapPosition> call(ArrayList<MapPosition> mapPositions, Integer integer) {
+                mapPositions.add(new MapPosition(0, integer, 0));
+                return mapPositions;
+            }
+        }).subscribe(new Action1<ArrayList<MapPosition>>() {
+            @Override
+            public void call(ArrayList<MapPosition> positions) {
                 if (mSurfaceHolder == null) return;
 
                 Canvas canvas = mSurfaceHolder.lockCanvas();
@@ -99,9 +108,19 @@ public class MainActivity extends AppCompatActivity {
                 Paint paint = new Paint();
                 paint.setStyle(Paint.Style.FILL);
                 paint.setColor(Color.RED);
+                paint.setStrokeWidth(10);
+
 
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
-                canvas.drawCircle(location.first, location.second + surfaceHolderLongPair * 10, 80, paint);
+                for(int i = 0; i < positions.size(); i++) {
+                    MapPosition start = positions.get(i);
+                    MapPosition end =  positions.size() > i + 1 ? positions.get(i + 1) : null;
+                    if(end != null) {
+                        canvas.drawLine(start.X, start.Y, end.X, end.Y, paint);
+                    } else {
+                        canvas.drawCircle(start.X, start.Y, 10, paint);
+                    }
+                }
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
             }
         });
