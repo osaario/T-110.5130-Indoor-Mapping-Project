@@ -102,7 +102,7 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER)
+        if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR)
         {
             stepSubject.onNext(1);
         }

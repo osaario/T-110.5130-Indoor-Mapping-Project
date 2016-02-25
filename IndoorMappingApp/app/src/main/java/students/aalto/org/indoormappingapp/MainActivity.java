@@ -47,7 +47,6 @@ import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 public class MainActivity extends AppCompatActivity {
 
     SurfaceHolder mSurfaceHolder;
-    Pair<Integer, Integer> location;
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private Uri fileUri;
 
@@ -67,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
                     public void surfaceCreated(SurfaceHolder surfaceHolder) {
                         Canvas canvas = surfaceHolder.lockCanvas();
                         canvas.drawColor(Color.WHITE);
-                        location = new Pair<Integer, Integer>(canvas.getWidth() / 2, canvas.getHeight() / 2);
                         surfaceHolder.unlockCanvasAndPost(canvas);
                         mSurfaceHolder = surfaceHolder;
                     }
@@ -84,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
+
 
         sensors.stepObservable.scan(new Func2<Integer, Integer, Integer>() {
             @Override
@@ -105,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
                 if (canvas == null) return;
                 canvas.drawColor(Color.WHITE);
 
+                int centerX = canvas.getWidth() / 2;
+                int centerY = canvas.getHeight() / 2;
                 Paint paint = new Paint();
                 paint.setStyle(Paint.Style.FILL);
                 paint.setColor(Color.RED);
@@ -116,9 +117,9 @@ public class MainActivity extends AppCompatActivity {
                     MapPosition start = positions.get(i);
                     MapPosition end = positions.size() > i + 1 ? positions.get(i + 1) : null;
                     if (end != null) {
-                        canvas.drawLine(start.X, start.Y, end.X, end.Y, paint);
+                        canvas.drawLine(centerX + start.X, centerY + start.Y, centerX + end.X, centerY + end.Y, paint);
                     } else {
-                        canvas.drawCircle(start.X, start.Y, 10, paint);
+                        canvas.drawCircle(centerX + start.X, centerY + start.Y, 10, paint);
                     }
                 }
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
