@@ -61,9 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
 
-        mSurfaceHolder = surfaceView.getHolder();
 
-                mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
+                surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
                     @Override
                     public void surfaceCreated(SurfaceHolder surfaceHolder) {
                         Canvas canvas = surfaceHolder.lockCanvas();
@@ -97,13 +96,13 @@ public class MainActivity extends AppCompatActivity {
                 mapPositions.add(new MapPosition(0, integer, 0));
                 return mapPositions;
             }
-        }).subscribe(new Action1<ArrayList<MapPosition>>() {
+        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<ArrayList<MapPosition>>() {
             @Override
             public void call(ArrayList<MapPosition> positions) {
                 if (mSurfaceHolder == null) return;
 
                 Canvas canvas = mSurfaceHolder.lockCanvas();
-                if(canvas == null) return;
+                if (canvas == null) return;
                 canvas.drawColor(Color.WHITE);
 
                 Paint paint = new Paint();
@@ -113,10 +112,10 @@ public class MainActivity extends AppCompatActivity {
 
 
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
-                for(int i = 0; i < positions.size(); i++) {
+                for (int i = 0; i < positions.size(); i++) {
                     MapPosition start = positions.get(i);
-                    MapPosition end =  positions.size() > i + 1 ? positions.get(i + 1) : null;
-                    if(end != null) {
+                    MapPosition end = positions.size() > i + 1 ? positions.get(i + 1) : null;
+                    if (end != null) {
                         canvas.drawLine(start.X, start.Y, end.X, end.Y, paint);
                     } else {
                         canvas.drawCircle(start.X, start.Y, 10, paint);
