@@ -4,6 +4,7 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,8 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
     SensorManager sensorManager;
     private Sensor stepSensor;
     private Sensor rotationSensor;
+    private Sensor magneticSensor;
+    private Sensor accelerationSensor;
 
     public rx.Observable<Integer> stepObservable;
 
@@ -48,6 +51,8 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
         rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+        magneticSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        accelerationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (rotationSensor == null) {
             rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         }
@@ -55,6 +60,8 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         stepObservable = stepSubject.asObservable();
         sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_GAME);
         //sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
+        boolean onko = sensorManager.registerListener(this, magneticSensor, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, accelerationSensor, SensorManager.SENSOR_DELAY_GAME);
 
         return inflater.inflate(R.layout.fragment_sensors, container, false);
     }
@@ -67,18 +74,27 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        switch (event.sensor.getType()) {
-            case Sensor.TYPE_STEP_DETECTOR:
-                Log.d("sensor", "step");
-                stepSubject.onNext(1);
-                break;
-            case Sensor.TYPE_GAME_ROTATION_VECTOR:
-            case Sensor.TYPE_ROTATION_VECTOR:
-                Log.d("sensor", "rotation " +  event.values[0] + "," + event.values[1] + "," + event.values[2]);
-                break;
+        int azimut = 0;
+        float[] mGravity = null;
+        float[] mGeomagnetic = null;
+
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+            mGravity = event.values;
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+            mGeomagnetic = event.values;
+        if (mGravity != null && mGeomagnetic != null) {
+            float R[] = new float[9];
+            float I[] = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity,
+                    mGeomagnetic);
+            if (success) {
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                azimut = (int) Math.round(Math.toDegrees(orientation[0]));
+                Log.d("azimuth", ":" + azimut);
+            }
         }
     }
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
