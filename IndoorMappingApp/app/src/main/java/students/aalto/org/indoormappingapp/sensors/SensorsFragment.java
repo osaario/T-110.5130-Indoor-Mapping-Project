@@ -13,6 +13,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import rx.Observable;
+import rx.functions.Action1;
+import rx.functions.Func2;
 import rx.subjects.PublishSubject;
 import students.aalto.org.indoormappingapp.R;
 
@@ -30,6 +33,8 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
     public rx.Observable<Integer> stepObservable;
 
     private PublishSubject<Integer> stepSubject = PublishSubject.create();
+    private PublishSubject<float[]> accelerometerSubject = PublishSubject.create();
+    private PublishSubject<float[]> magneticSubject = PublishSubject.create();
 
     public SensorsFragment() {
     }
@@ -63,6 +68,29 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         boolean onko = sensorManager.registerListener(this, magneticSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, accelerationSensor, SensorManager.SENSOR_DELAY_GAME);
 
+        Observable.combineLatest(magneticSubject, accelerometerSubject, new Func2<float[], float[], Integer>() {
+            @Override
+            public Integer call(float[] magnetic, float[] accelerometer) {
+                float R[] = new float[9];
+                float I[] = new float[9];
+                boolean success = SensorManager.getRotationMatrix(R, I, magnetic,
+                        accelerometer);
+                if (success) {
+                    float orientation[] = new float[3];
+                    SensorManager.getOrientation(R, orientation);
+                    Integer azimut = (int) Math.round(Math.toDegrees(orientation[0]));
+                    return azimut;
+                } else {
+                    return null;
+                }
+            }
+        }).subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer o) {
+                Log.d("azimuth", ":" + o);
+            }
+        });
+
         return inflater.inflate(R.layout.fragment_sensors, container, false);
     }
 
@@ -74,25 +102,13 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        int azimut = 0;
-        float[] mGravity = null;
-        float[] mGeomagnetic = null;
-
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-            mGravity = event.values;
+        {
+            accelerometerSubject.onNext(event.values);
+        }
         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            mGeomagnetic = event.values;
-        if (mGravity != null && mGeomagnetic != null) {
-            float R[] = new float[9];
-            float I[] = new float[9];
-            boolean success = SensorManager.getRotationMatrix(R, I, mGravity,
-                    mGeomagnetic);
-            if (success) {
-                float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
-                azimut = (int) Math.round(Math.toDegrees(orientation[0]));
-                Log.d("azimuth", ":" + azimut);
-            }
+        {
+            magneticSubject.onNext(event.values);
         }
     }
     @Override
