@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import rx.Observable;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.subjects.PublishSubject;
 import students.aalto.org.indoormappingapp.R;
@@ -36,6 +37,7 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
     private PublishSubject<Integer> stepSubject = PublishSubject.create();
     private PublishSubject<float[]> accelerometerSubject = PublishSubject.create();
     private PublishSubject<float[]> magneticSubject = PublishSubject.create();
+    private PublishSubject<float[]> rotationSubject = PublishSubject.create();
 
     public SensorsFragment() {
     }
@@ -65,11 +67,11 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
 
         stepObservable = stepSubject.asObservable();
         sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_GAME);
-        //sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
         boolean onko = sensorManager.registerListener(this, magneticSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, accelerationSensor, SensorManager.SENSOR_DELAY_GAME);
 
-        azimuthObservable = Observable.combineLatest(magneticSubject, accelerometerSubject, new Func2<float[], float[], Integer>() {
+        /*azimuthObservable = Observable.combineLatest(magneticSubject, accelerometerSubject, new Func2<float[], float[], Integer>() {
             @Override
             public Integer call(float[] magnetic, float[] accelerometer) {
                 float R[] = new float[9];
@@ -79,11 +81,25 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
                 if (success) {
                     float orientation[] = new float[3];
                     SensorManager.getOrientation(R, orientation);
-                    Integer azimut = (int) Math.round(Math.toDegrees(orientation[0]));
+                    Integer azimut = (int) Math.round(Math.toDegrees(orientation[1]));
+                    //Log.d("test", "orientation 0:" + orientation[0] + " 1:" + orientation[1] + " 2:" + orientation[2]);
                     return azimut;
                 } else {
                     return null;
                 }
+            }
+        });*/
+
+        azimuthObservable = rotationSubject.map(new Func1<float[], Integer>() {
+            @Override
+            public Integer call(float[] floats) {
+                float[] rotationMatrix = new float[16];
+                SensorManager.getRotationMatrixFromVector(rotationMatrix, floats);
+                float[] orientation = new float[3];
+                SensorManager.getOrientation(rotationMatrix, orientation);
+                Integer azimut = (int) Math.round(Math.toDegrees(orientation[0]));
+                //Log.d("test", "rotation 0:" + Math.toDegrees(orientation[0]) + " 1:" + Math.toDegrees(orientation[1]) + " 2:" + Math.toDegrees(orientation[2]));
+                return azimut;
             }
         });
 
@@ -98,17 +114,22 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR)
+        int type = event.sensor.getType();
+        if (type == Sensor.TYPE_STEP_DETECTOR)
         {
             stepSubject.onNext(1);
         }
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+        if (type == Sensor.TYPE_ACCELEROMETER)
         {
             accelerometerSubject.onNext(event.values);
         }
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+        if (type == Sensor.TYPE_MAGNETIC_FIELD)
         {
             magneticSubject.onNext(event.values);
+        }
+        if (type == Sensor.TYPE_GAME_ROTATION_VECTOR || type == Sensor.TYPE_ROTATION_VECTOR)
+        {
+            rotationSubject.onNext(event.values);
         }
     }
     @Override

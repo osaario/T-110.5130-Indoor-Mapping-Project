@@ -122,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
                         return new MapPosition(xx, yy, 0);
                     }
                 });
-        // sensors.stepObservable
-        buttonStepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
+        //buttonStepObservable
+        sensors.stepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
             @Override
             public MapPosition call(Integer integer, MapPosition mapPosition) {
                 return mapPosition;
