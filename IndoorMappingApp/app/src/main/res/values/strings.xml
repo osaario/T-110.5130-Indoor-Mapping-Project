@@ -4,4 +4,7 @@
     <string name="hello_world">Hello World</string>
     <string name="title_activity_map">map</string>
     <string name="title_activity_camera">CameraActivity</string>
+    <string name="turn_left">Left</string>
+    <string name="take_step">Step</string>
+    <string name="turn_right">Right</string>
 </resources>

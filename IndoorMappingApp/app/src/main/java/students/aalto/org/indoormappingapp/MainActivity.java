@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,27 +65,42 @@ public class MainActivity extends AppCompatActivity {
         final TextView xTextView = (TextView) findViewById(R.id.x_text);
         final TextView yTextView = (TextView) findViewById(R.id.y_text);
         final TextView azTextView = (TextView) findViewById(R.id.az_text);
+        final Button leftButton = (Button) findViewById(R.id.button_left);
+        final Button stepButton = (Button) findViewById(R.id.button_step);
+        final Button rightButton = (Button) findViewById(R.id.button_right);
 
+        surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder surfaceHolder) {
+                Canvas canvas = surfaceHolder.lockCanvas();
+                canvas.drawColor(Color.WHITE);
+                surfaceHolder.unlockCanvasAndPost(canvas);
+                mSurfaceHolder = surfaceHolder;
+            }
 
-                surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+                mSurfaceHolder = surfaceHolder;
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+                mSurfaceHolder = null;
+            }
+        });
+
+        // Create mock step from button.
+        Observable<Integer> buttonStepObservable = Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(final Subscriber<? super Integer> subscriber) {
+                stepButton.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void surfaceCreated(SurfaceHolder surfaceHolder) {
-                        Canvas canvas = surfaceHolder.lockCanvas();
-                        canvas.drawColor(Color.WHITE);
-                        surfaceHolder.unlockCanvasAndPost(canvas);
-                        mSurfaceHolder = surfaceHolder;
-                    }
-
-                    @Override
-                    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-                        mSurfaceHolder = surfaceHolder;
-                    }
-
-                    @Override
-                    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-                        mSurfaceHolder = null;
+                    public void onClick(View v) {
+                        subscriber.onNext(1);
                     }
                 });
+            }
+        });
 
         SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
 
@@ -106,7 +122,8 @@ public class MainActivity extends AppCompatActivity {
                         return new MapPosition(xx, yy, 0);
                     }
                 });
-        sensors.stepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
+        // sensors.stepObservable
+        buttonStepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
             @Override
             public MapPosition call(Integer integer, MapPosition mapPosition) {
                 return mapPosition;
@@ -114,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         }).scan(new Func2<MapPosition, MapPosition, MapPosition>() {
             @Override
             public MapPosition call(MapPosition mapPosition, MapPosition mapPosition2) {
-                if(mapPosition == null) mapPosition = new MapPosition(0,0,0);
+                if (mapPosition == null) mapPosition = new MapPosition(0, 0, 0);
                 return new MapPosition(mapPosition.X + mapPosition2.X, mapPosition.Y + mapPosition2.Y, 0);
             }
         }).scan(new ArrayList<MapPosition>(), new Func2<ArrayList<MapPosition>, MapPosition, ArrayList<MapPosition>>() {
@@ -235,13 +252,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /** Create a file Uri for saving an image or video */
-    private static Uri getOutputMediaFileUri(int type){
+    /**
+     * Create a file Uri for saving an image or video
+     */
+    private static Uri getOutputMediaFileUri(int type) {
         return Uri.fromFile(getOutputMediaFile(type));
     }
 
-    /** Create a File for saving an image or video */
-    private static File getOutputMediaFile(int type){
+    /**
+     * Create a File for saving an image or video
+     */
+    private static File getOutputMediaFile(int type) {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
 
@@ -251,8 +272,8 @@ public class MainActivity extends AppCompatActivity {
         // between applications and persist after your app has been uninstalled.
 
         // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
                 Log.d("MyCameraApp", "failed to create directory");
                 return null;
             }
@@ -261,12 +282,12 @@ public class MainActivity extends AppCompatActivity {
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE){
+        if (type == MEDIA_TYPE_IMAGE) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
-        } else if(type == MEDIA_TYPE_VIDEO) {
+                    "IMG_" + timeStamp + ".jpg");
+        } else if (type == MEDIA_TYPE_VIDEO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_"+ timeStamp + ".mp4");
+                    "VID_" + timeStamp + ".mp4");
         } else {
             return null;
         }
