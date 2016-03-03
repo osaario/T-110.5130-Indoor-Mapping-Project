@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -35,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -59,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
+        final TextView xTextView = (TextView) findViewById(R.id.x_text);
+        final TextView yTextView = (TextView) findViewById(R.id.y_text);
+        final TextView azTextView = (TextView) findViewById(R.id.az_text);
 
 
                 surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
@@ -83,16 +88,39 @@ public class MainActivity extends AppCompatActivity {
 
         SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
 
+        rx.Observable<MapPosition> direction =
+                sensors.azimuthObservable.sample(200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()).map(new Func1<Integer, MapPosition>() {
+                    @Override
+                    public MapPosition call(Integer azimuth) {
+                        double x = Math.cos((double) azimuth * 0.0174532925) * 10;
+                        double y = Math.sin((double) azimuth * 0.0174532925) * 10;
+                        int xx = (int) x;
+                        int yy = (int) y;
+                        Log.d("x", x + "");
+                        Log.d("y", y + "");
+                        Log.d("azimuth", azimuth + "");
+                        xTextView.setText("x" + x);
+                        yTextView.setText("y" + y);
+                        azTextView.setText("az" + azimuth);
 
-        sensors.stepObservable.scan(new Func2<Integer, Integer, Integer>() {
+                        return new MapPosition(xx, yy, 0);
+                    }
+                });
+        sensors.stepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
             @Override
-            public Integer call(Integer integer, Integer integer2) {
-                return integer + integer2;
+            public MapPosition call(Integer integer, MapPosition mapPosition) {
+                return mapPosition;
             }
-        }).scan(new ArrayList<MapPosition>(), new Func2<ArrayList<MapPosition>, Integer, ArrayList<MapPosition>>() {
+        }).scan(new Func2<MapPosition, MapPosition, MapPosition>() {
             @Override
-            public ArrayList<MapPosition> call(ArrayList<MapPosition> mapPositions, Integer integer) {
-                mapPositions.add(new MapPosition(0, integer, 0));
+            public MapPosition call(MapPosition mapPosition, MapPosition mapPosition2) {
+                if(mapPosition == null) mapPosition = new MapPosition(0,0,0);
+                return new MapPosition(mapPosition.X + mapPosition2.X, mapPosition.Y + mapPosition2.Y, 0);
+            }
+        }).scan(new ArrayList<MapPosition>(), new Func2<ArrayList<MapPosition>, MapPosition, ArrayList<MapPosition>>() {
+            @Override
+            public ArrayList<MapPosition> call(ArrayList<MapPosition> mapPositions, MapPosition integer) {
+                mapPositions.add(integer);
                 return mapPositions;
             }
         }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<ArrayList<MapPosition>>() {

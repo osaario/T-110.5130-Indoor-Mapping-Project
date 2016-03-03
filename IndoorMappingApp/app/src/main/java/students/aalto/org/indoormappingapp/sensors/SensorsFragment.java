@@ -31,6 +31,7 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
     private Sensor accelerationSensor;
 
     public rx.Observable<Integer> stepObservable;
+    public rx.Observable<Integer> azimuthObservable;
 
     private PublishSubject<Integer> stepSubject = PublishSubject.create();
     private PublishSubject<float[]> accelerometerSubject = PublishSubject.create();
@@ -68,7 +69,7 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         boolean onko = sensorManager.registerListener(this, magneticSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, accelerationSensor, SensorManager.SENSOR_DELAY_GAME);
 
-        Observable.combineLatest(magneticSubject, accelerometerSubject, new Func2<float[], float[], Integer>() {
+        azimuthObservable = Observable.combineLatest(magneticSubject, accelerometerSubject, new Func2<float[], float[], Integer>() {
             @Override
             public Integer call(float[] magnetic, float[] accelerometer) {
                 float R[] = new float[9];
@@ -83,11 +84,6 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
                 } else {
                     return null;
                 }
-            }
-        }).subscribe(new Action1<Integer>() {
-            @Override
-            public void call(Integer o) {
-                Log.d("azimuth", ":" + o);
             }
         });
 
