@@ -27,7 +27,7 @@ exports.create = function(req, res) {
 };
 
 exports.list = function(req, res) {
-	Photo.find().exec(function(err, articles) {
+	Photo.find().exec(function(err, photos) {
 		if (err) {
 			return res.status(400).send({
 				message: getErrorMessage(err)
