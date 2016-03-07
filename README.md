@@ -3,12 +3,7 @@ T-110.5130-Indoor-Mapping-Project
 Project Plan
 ------------
 
-### 1. Introduction
-<!---
-Give a brief overview of the system to be developed, motivation for its
-development, the environment where it will be used, and possibly the types
-of users for the system.
--->
+### Introduction
 
 Mobile devices can be used to collect sensor data for construction of indoor
 navigation systems. One such system is iMoon.*
@@ -38,128 +33,41 @@ Later on, there are possibilities to develop support for crowdsourcing.
 
 \* Dong, J., Xiao, Y., Noreikis, M., Ou, Z., & Ylä-Jääski, A. (2015, November). imoon: Using smartphones for image-based indoor navigation. In Proceedings of the 13th ACM Conference on Embedded Networked Sensor Systems (pp. 85-97). ACM.
 
-### 2. Stakeholders and staffing
+### Goals and scope
 
-Present the stakeholders of the project and list all group members along with their contact information. You may assign roles (such as project manager) to the group members and/or list the relevant interests or skills of the group members.
+The project produces an effective application that exports data for iMoon navigation mesh generation. Therefore, it reduces the stakeholders' effort to gather data for the iMoon system. The quality of data that the pilot user collects assisted by the application is qualitatively evaluated. Conducting comparative testing with other data collection methods is outside the project scope.
 
+The project scope includes the first application version targeting researches and possibly property owners. This limited target group is expected to have relatively new Android devices compared to general population. This allows the first application version to take benefit of advanced sensor data. The second version would need to improve support for older devices and less accurate sensors.
 
-### 3. Goals and scope
+Currently there is no active market for indoor navigation applications. This project is enabling research and demonstrations of indoor navigation systems. We are not developing concepts or algorithms that could be patented. Considering this background, the team does not have a direct business goal for this project. The project team publishes the application open source in GitHub. If iMoon or another indoor navigation system, using sensor data, gathers audience in future, business cases may arise. The project team acquires experience and public reference on the topic.
 
----
+### System overview
 
-This section describes the goals of the project group and the individual learning goals of the group members. Define the scope of the project. You may also include the business goals of the system, and describe the benefits it provides to different stakeholders, including the users.
+Android application collects the necessary information, including captured images and estimated locations, for use in the indoor mapping system. The mentioned information is gathered from the Android sensors and it is sent to back-end web service for later exporting. The web service is a data oriented restful HTTP service API. The application allows user to calibrate the estimated locations and assists the user to cover the area completely and accurately.
 
----
+### Requirements
 
-Business goal:
-- Reduce the stakeholders' effort to gather data for the iMoon system.
+The application has following primary functional requirements
 
-Group learning goals:
-- Teamwork and collaboration skills
-- Producing an end to end product in schedule
+* User can take and store photos.
+* Application determines (with the use of coordinate system) user’s walking trace.
+* Application visualizes the walking trace including location and direction of photos as a map.
+* All collected data is send to backend service which stores it in database.
+* Back-end service exports selected data set for iMoon system which generates navigation mesh from it.
 
+The following functional requirements are considered after MVP in priority order
 
-Individual learning goals for project leader Olli-Matti Saario:
+* User can calibrate and modify (e.g. by touching) walking trace locations and directions.
+* User can add clarifying text descriptions to map and/or photos.
+* User can load previously collected data set and append new data.
+* User can add clarifying line drawings to map.
+* Application collects Wi-Fi fingerprints, barometer, and magnetic field data along walking trace automatically.
+* Back-end service controls access to existing data sets by device.
+* User can share data sets using e.g. email for other devices.
+* User can view and modify data sets in the web service.
 
-- Management and facilitation of a software team
-- Techonolgy decision making in a team project with members of different professional backgrounds
-- Communication between project management and stakeholders
-- Web backend development
+The non-functional requirements are
 
-Individual learning goals for Teemu Lehtinen:
-
-- Android development
-- ReactiveX driven UI-programming
-- Sensors in mobile devices
-
-Individual learning goals for Kirill Ermolov:
-
-- Android development
-- Algorithms development in Java
-- ReactiveX programming
-
-Inidividual learning goals for Mehrad Mohammedi:
-
-- Android development
-- Canvas based drawing in Android
-
-
-### 4. Work practices and tools
-
----
-Describe all planned work practices in a concrete but concise way. How the practice is used, what tasks/meetings/materials etc. are needed, who is responsible of what etc. In addition, list all the tools you plan to use, and describe the required development and test environments.
-
-Possible sub-topics (ask the tutor what are relevant for your project):
-
-* Time tracking (is some tool used, how often reported, who creates tasks, ...)
-* Documenting (documentation tools, document storage and delivery to stakeholders, document authors, document review, ...)
-* Communication (How do you arrange optimal amount of communication and knowledge transfer between all stakeholders?)
-* Version control (which version management tool is used, what conventions to follow (check-out/check-in frequency, change log, tagging), which files to manage, ...)
-* Design (How architectural design and lower level design is done? Modeling tools used? Validation?)
-* Quality assurance (quality goals, QA practices, …)
-* Tools (Summary of all tools used. Mention version numbers and availability information, if relevant to the project. Description of all development and test environments that are needed; both software and hardware environments.)
-
----
-
-
-There will be regular meetings. The agenda includes reviewing the latest status of the projects and planning the next steps. Most of each task will be done individually by each team member.
-
-
-Time tracking:
-- Use trello as a backlog
-- Tasks created by the project leader
-
-Documenting:
-- Google docs
-- Documents can be shared to stakeholders in the cloud (Discussion on what the stakeholders' prefer?)
-
-Communication:
-- To be decided with the stakeholders
-- Telegram
-
-Version control:
-- Git
-- Pull requests and feature branches
-
-Design:
-
-- Standard Android MVC architecure pattern with Reactive data flow
-- No modeling tools needed
-
-QA:
-
-- Unit tests for algorithms
-- Ad-hoc testing for UI
-
-Tools:
-
-- Android studio with Gradle build system
-- Real life test devices since emulators lack relevant sensor data
-
-
-### 5. Schedule and resources
-
-Design an initial schedule for the project. Consider whether you want to split the project into iterations. Allocate 120 hours per each group member for the project (5 credits * 27 hours / credit - 15 hours for lectures, etc. = 120 hours). In addition, consider any material hardware or software resources used in the project.
-
-
-### 6. System overview
-
-This chapter is a high level description of the intended solution (= the system). It typically includes
-z
-* a graph (for example a use case diagram) that defines user groups and the main functions of the system
-* short textual description of the system
-
-
----
-
-The system is an Android application to collect the necessary information including pictures for the indoor mapping system. The mentioned information is gathered from the Android sensors and it will be sent to server.
-![My image](http://s11.postimg.org/t38tdxmhv/Use_Cases.png)
-
-### 7. Requirements
-
-Define the functional and non-functional requirements of the system.
-
-
-### 8. Risk management
-
-Identify risks in the project as well as their impact and probability. For example – what happens if one of the group members decides to quit the course? Discuss the tools or methods to either avoid these risks completely or to minimize the impact on the project if they occur. You don’t have to identify all the possible risks, just concentrate on the most significant ones due to their probability or impact.
+* Good usability and user experience
+* Reliability of the application and backend service
+* Data integrity
