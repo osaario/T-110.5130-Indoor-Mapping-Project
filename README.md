@@ -1,7 +1,4 @@
-T-110.5130-Indoor-Mapping-Project
-
-Project Plan
-------------
+T-110.5130 Data collection for indoor mapping
 
 ### Introduction
 
