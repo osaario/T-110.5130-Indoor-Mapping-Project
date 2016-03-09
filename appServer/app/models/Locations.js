@@ -10,7 +10,7 @@ var LocationSchema = new Schema({
 	yCoordinate: { type: Number, required: 'Y-Coordinate cannot be blank'},
 	zCoordinate: { type: Number, required: 'Z-Coordinate cannot be blank'},
 	dataSet: {type: Schema.ObjectId,ref: 'DataSet'},
-	previousLocation: {type: Schema.ObjectId,ref: 'Location'}
+	previousLocation: {type: Schema.ObjectId,ref: 'Location', default: null}
 });
 
 mongoose.model('Location', LocationSchema);

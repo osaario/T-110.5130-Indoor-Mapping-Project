@@ -1,7 +1,10 @@
 
 'use strict';
 var mongoose = require('mongoose'),
-	Photo = mongoose.model('Photo');
+	Photo = mongoose.model('Photo'),
+	DataSet = mongoose.model('DataSet'),
+	Rotation = mongoose.model('Rotation'),
+	PhotoLocation = mongoose.model('Location');
 
 var getErrorMessage = function(err) {
 	if (err.errors) {
@@ -14,7 +17,31 @@ var getErrorMessage = function(err) {
 };
 
 exports.create = function(req, res) {
-	var photo = new Photo(req.body);
+	var objectIDs = {};
+
+	var dataSet = new DataSet();
+	dataSet.save(function (err, object) {
+		objectIDs[dataSetID] = object._id;
+	});
+
+	var rotation = new Rotation(req.body.rotation);
+	dataSet.save(function (err, object) {
+		objectIDs[rotationID] = object._id;
+	});
+
+	var photoLocation = new Location(req.body.photoLocation);
+	photoLocation.dataSet = objectIDs.dataSetID;
+	PhotoLocation.find().limit(1).sort({$natural:-1}).exec(function(err, pLocation) {
+		if (pLocation)
+			previousLocation = pLocation._id;
+	});
+	photoLocation.save(function (err, object) {
+		objectIDs[photoLocationID] = object._id;
+	});
+
+	var photo = new Photo(req.body.photo);
+	photo.rotation = objectIDs.rotationID;
+	photo.photoLocation = objectIDs.photoLocationID;
 	photo.save(function(err) {
 		if (err) {
 			return res.status(400).send({
