@@ -33,7 +33,7 @@ exports.create = function(req, res) {
 	photoLocation.dataSet = objectIDs.dataSetID;
 	PhotoLocation.find().limit(1).sort({$natural:-1}).exec(function(err, pLocation) {
 		if (pLocation)
-			previousLocation = pLocation._id;
+			photoLocation.previousLocation = pLocation._id;
 	});
 	photoLocation.save(function (err, object) {
 		objectIDs[photoLocationID] = object._id;
