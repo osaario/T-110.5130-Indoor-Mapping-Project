@@ -122,8 +122,7 @@ public class MainActivity extends AppCompatActivity {
                         return new MapPosition(xx, yy, 0);
                     }
                 });
-        //buttonStepObservable
-        sensors.stepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
+        buttonStepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
             @Override
             public MapPosition call(Integer integer, MapPosition mapPosition) {
                 return mapPosition;
@@ -156,15 +155,25 @@ public class MainActivity extends AppCompatActivity {
                 paint.setColor(Color.RED);
                 paint.setStrokeWidth(10);
 
+                Integer translationX;
+                Integer translationY;
+                if(positions.size() > 0) {
+                    translationX = positions.get(positions.size() - 1).X;
+                    translationY = positions.get(positions.size() - 1).Y;
+                } else {
+                    translationX = 0;
+                    translationY = 0;
+
+                }
 
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
                 for (int i = 0; i < positions.size(); i++) {
                     MapPosition start = positions.get(i);
                     MapPosition end = positions.size() > i + 1 ? positions.get(i + 1) : null;
                     if (end != null) {
-                        canvas.drawLine(centerX + start.X, centerY + start.Y, centerX + end.X, centerY + end.Y, paint);
+                        canvas.drawLine(centerX + start.X - translationX, centerY + start.Y - translationY, centerX + end.X - translationX, centerY + end.Y - translationY, paint);
                     } else {
-                        canvas.drawCircle(centerX + start.X, centerY + start.Y, 10, paint);
+                        canvas.drawCircle(centerX + start.X - translationX, centerY + start.Y - translationY, 10, paint);
                     }
                 }
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
