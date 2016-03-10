@@ -109,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
         Observable<Integer> buttonStepObservable = Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
@@ -119,9 +121,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-        });
-
-        SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
+        }).mergeWith(sensors.stepObservable);
 
         rx.Observable<MapPosition> direction =
                 sensors.azimuthObservable.sample(200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()).map(new Func1<Integer, MapPosition>() {
