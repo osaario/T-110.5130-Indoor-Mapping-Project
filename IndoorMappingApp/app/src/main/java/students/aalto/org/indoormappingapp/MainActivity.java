@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.SyncStateContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -22,10 +23,28 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
@@ -34,6 +53,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.schedulers.Schedulers;
+import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
 import students.aalto.org.indoormappingapp.model.MapPosition;
 import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 
@@ -245,14 +266,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                // create Intent to take a picture and return control to the calling application
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                sendLocation(0,0,0).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        // create Intent to take a picture and return control to the calling application
+                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
+                        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
 
-                // start the image capture Intent
-                startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                        // start the image capture Intent
+                        startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                    }
+                });
+
+
             }
         });
     }
@@ -352,6 +380,48 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public static Observable<Boolean> sendLocation(final float x, final float y, final float z) {
+        final OkHttpClient client = new OkHttpClient();
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        Callable c = new Callable<Boolean>() {
+
+            @Override
+            public Boolean call() throws Exception {
+                final OutputStream out = new ByteArrayOutputStream();
+                JsonFactory f = new JsonFactory();
+                JsonGenerator g = f.createGenerator(out);
+                g.writeStartObject();
+                g.writeNumberField("xCoordinate", x);
+                g.writeNumberField("yCoordinate", y);
+                g.writeNumberField("zCoordinate", z);
+                g.writeEndObject();
+                g.close();
+                String json = out.toString();
+                Request request = new Request.Builder()
+                        .post(RequestBody.create(MediaType.parse("application/json"), json))
+                        .url("http://requestb.in/wztvrxwz")
+                        .addHeader("Content-Type", "application/json")
+                        .build();
+
+                Response response = client.newCall(request).execute();
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                //String jsonResponse = response.body().string();
+                //ObjectMapper mapper = new ObjectMapper();
+                //JsonNode node = mapper.readTree(jsonResponse);
+                //TypeReference<User> typeRef = new TypeReference<User>(){};
+                //User list;
+                //list = mapper.readValue(node.traverse(), typeRef);
+
+                return true;
+            }
+        };
+
+        FutureTask<Boolean> task = new FutureTask<Boolean>(c);
+        executor.execute(task);
+        return Observable.from(task).subscribeOn(Schedulers.newThread());
     }
 
 }
