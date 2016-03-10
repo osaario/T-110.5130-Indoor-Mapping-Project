@@ -67,7 +67,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/turn_left"/>
+            android:text="@string/minus"/>
 
         <Button
             android:id="@+id/button_step"
@@ -81,7 +81,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/turn_right"/>
+            android:text="@string/plus"/>
 
     </LinearLayout>
 

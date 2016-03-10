@@ -7,4 +7,6 @@
     <string name="turn_left">Left</string>
     <string name="take_step">Step</string>
     <string name="turn_right">Right</string>
+    <string name="minus">-</string>
+    <string name="plus">+</string>
 </resources>

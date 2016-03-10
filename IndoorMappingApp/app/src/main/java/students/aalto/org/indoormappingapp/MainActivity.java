@@ -1,20 +1,14 @@
 package students.aalto.org.indoormappingapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -24,9 +18,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +26,6 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
@@ -43,7 +34,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
-import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
 import students.aalto.org.indoormappingapp.model.MapPosition;
 import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 
@@ -90,6 +80,35 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Create mock step from button.
+        Observable<Float> zoomObservable = Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(final Subscriber<? super Integer> subscriber) {
+                leftButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        subscriber.onNext(-1);
+                    }
+                });
+
+                rightButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        subscriber.onNext(1);
+                    }
+                });
+            }
+        }).scan(new Func2<Integer, Integer, Integer>() {
+            @Override
+            public Integer call(Integer integer, Integer integer2) {
+                return integer + integer2;
+            }
+        }).startWith(0).map(new Func1<Integer, Float>() {
+            @Override
+            public Float call(Integer integer) {
+                return 1.0f + ((float)integer * 0.1f);
+            }
+        });
+
         Observable<Integer> buttonStepObservable = Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
@@ -122,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                         return new MapPosition(xx, yy, 0);
                     }
                 });
-        buttonStepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
+        Observable<ArrayList<MapPosition>> positionObs = buttonStepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
             @Override
             public MapPosition call(Integer integer, MapPosition mapPosition) {
                 return mapPosition;
@@ -139,11 +158,18 @@ public class MainActivity extends AppCompatActivity {
                 mapPositions.add(integer);
                 return mapPositions;
             }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<ArrayList<MapPosition>>() {
+        });
+        Observable.combineLatest(positionObs, zoomObservable, new Func2<ArrayList<MapPosition>, Float, Pair<ArrayList<MapPosition>, Float>>() {
             @Override
-            public void call(ArrayList<MapPosition> positions) {
+            public Pair<ArrayList<MapPosition>, Float> call(ArrayList<MapPosition> mapPositions, Float aFloat) {
+                return new Pair<ArrayList<MapPosition>, Float>(mapPositions, aFloat);
+            }
+        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Pair<ArrayList<MapPosition>, Float>>() {
+            @Override
+            public void call(Pair<ArrayList<MapPosition>, Float> arrayListFloatPair) {
                 if (mSurfaceHolder == null) return;
 
+                ArrayList<MapPosition> positions = arrayListFloatPair.first;
                 Canvas canvas = mSurfaceHolder.lockCanvas();
                 if (canvas == null) return;
                 canvas.drawColor(Color.WHITE);
@@ -157,15 +183,20 @@ public class MainActivity extends AppCompatActivity {
 
                 Integer translationX;
                 Integer translationY;
-                if(positions.size() > 0) {
+                if (positions.size() > 0) {
                     translationX = positions.get(positions.size() - 1).X;
                     translationY = positions.get(positions.size() - 1).Y;
                 } else {
                     translationX = 0;
                     translationY = 0;
-
                 }
 
+                float scaleX = arrayListFloatPair.second;
+                float scaleY = scaleX;
+
+                canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
+                        ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
+                canvas.scale(scaleX, scaleY);
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
                 for (int i = 0; i < positions.size(); i++) {
                     MapPosition start = positions.get(i);
@@ -177,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
+
             }
         });
 
