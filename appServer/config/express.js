@@ -26,7 +26,7 @@ module.exports = function() {
 	app.set('view engine', 'ejs');
 	
 	require('../app/routes/index.routes.js')(app);
-	require('../app/routes/photos.routes.js')(app);
+	require('../app/routes/dataSets.routes.js')(app);
 
 	app.use(express.static('./public'));
 
