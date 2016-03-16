@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
@@ -13,44 +16,55 @@ import java.util.List;
 
 public class home extends AppCompatActivity {
 
-    private Spinner spinner;
+
     private Button btnNext;
+    private ListView listview;
+    private RadioGroup radioGroup;
+    private Button rgButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        addItemsOnSpinner();
+        addItemsToRadioGroup();
         addListenerOnButton();
+        addListenerOnListView();
+    }
+
+    private void addItemsToRadioGroup() {
+        radioGroup = (RadioGroup) findViewById(R.id.radioGroup_home);
+
+        for(int i = 0; i < 3; i++) {
+            rgButton  = new RadioButton(this);
+            rgButton .setText("Building" + i);
+            radioGroup.addView(rgButton);
+        }
+
+
+
     }
 
     private void addListenerOnButton() {
-        spinner = (Spinner) findViewById(R.id.spinner);
+
         btnNext = (Button) findViewById(R.id.button);
 
         btnNext.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                String building = String.valueOf(spinner.getSelectedItem());;
+                String building = ((RadioButton)findViewById(radioGroup.getCheckedRadioButtonId())).getText().toString();
                 Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                intent.putExtra("building", building );
+                intent.putExtra("building", building);
                 startActivity(intent);
             }
-
         });
+    }
+    public void addListenerOnListView(){
+
+
 
     }
+    private void addItemsToListView() {
 
-    private void addItemsOnSpinner() {
-        spinner = (Spinner) findViewById(R.id.spinner);
-        List<String> list = new ArrayList<String>();
-        list.add("building 1");
-        list.add("building 2");
-        list.add("building 3");
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, list);
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(dataAdapter);
     }
 }
