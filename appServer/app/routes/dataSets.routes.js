@@ -12,4 +12,8 @@ module.exports = function(app) {
 		.get(dataSets.listLocations)
 		.post(dataSets.createLocation);
 
+	app.route('/api/datasets/:datasetId/locations/:locationId/photos')
+		.get(dataSets.listPhotos)
+		.post(dataSets.createPhoto);
+
 };
