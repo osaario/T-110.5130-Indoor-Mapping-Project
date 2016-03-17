@@ -69,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void drawGrid(Canvas canvas, int x_off, int y_off) {
         //pixels
-        final int startX = 0;
-        final int startY = 0;
+        final int startX = -1000;
+        final int startY = -1000;
         final int endY = 3000;
 
         Paint paint = new Paint();
@@ -96,6 +96,9 @@ public class MainActivity extends AppCompatActivity {
         final TextView xTextView = (TextView) findViewById(R.id.x_text);
         final TextView yTextView = (TextView) findViewById(R.id.y_text);
         final TextView azTextView = (TextView) findViewById(R.id.az_text);
+        final TextView stopText = (TextView) findViewById(R.id.stop_to_turn_label);
+        final TextView okText = (TextView) findViewById(R.id.ok_to_turn_label);
+
         final Button leftButton = (Button) findViewById(R.id.button_left);
         final Button stepButton = (Button) findViewById(R.id.button_step);
         final Button rightButton = (Button) findViewById(R.id.button_right);
@@ -162,7 +165,21 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-        }).mergeWith(sensors.stepObservable);
+        }).mergeWith(sensors.stepObservable).replay().refCount();
+
+        buttonStepObservable.doOnNext(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                stopText.setVisibility(View.VISIBLE);
+                okText.setVisibility(View.INVISIBLE);
+            }
+        }).debounce(5, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Integer>() {
+            @Override
+            public void call(Integer integer) {
+                stopText.setVisibility(View.INVISIBLE);
+                okText.setVisibility(View.VISIBLE);
+            }
+        });
 
         rx.Observable<MapPosition> direction =
                 sensors.azimuthObservable.sample(200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()).map(new Func1<Integer, MapPosition>() {
@@ -238,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
                 canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
                         ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
                 canvas.scale(scaleX, scaleY);
-                drawGrid(canvas, - translationX % gridStep, - translationY % gridStep);
+                drawGrid(canvas, -translationX % gridStep, -translationY % gridStep);
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
                 for (int i = 0; i < positions.size(); i++) {
                     MapPosition start = positions.get(i);

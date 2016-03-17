@@ -10,4 +10,7 @@
     <string name="minus">-</string>
     <string name="plus">+</string>
     <string name="title_activity_floor">FloorActivity</string>
+    <string name="ok_to_walk">OK TO WALK</string>
+    <string name="ok_to_turn">OK TO TURN</string>
+    <string name="stop_to_turn">STOP TO TURN</string>
 </resources>
