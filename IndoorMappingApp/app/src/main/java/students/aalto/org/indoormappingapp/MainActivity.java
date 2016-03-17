@@ -60,10 +60,30 @@ import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    final int gridSize = 100;
+    final int gridStep = 80;
     SurfaceHolder mSurfaceHolder;
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private Uri fileUri;
 
+
+    private void drawGrid(Canvas canvas, int x_off, int y_off) {
+        //pixels
+        final int startX = 0;
+        final int startY = 0;
+        final int endY = 3000;
+
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.GRAY);
+        paint.setStrokeWidth(2);
+        for(int i = 0; i < gridSize; i++) {
+            canvas.drawLine(startX + gridStep * i + x_off, startY + y_off, startX + gridStep * i + x_off, endY + y_off, paint);
+        }
+        for(int i = 0; i < gridSize; i++) {
+            canvas.drawLine(startX + x_off, startY + gridStep * i + y_off, endY + x_off, startY + gridStep * i + y_off, paint);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -218,6 +238,7 @@ public class MainActivity extends AppCompatActivity {
                 canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
                         ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
                 canvas.scale(scaleX, scaleY);
+                drawGrid(canvas, - translationX % gridStep, - translationY % gridStep);
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
                 for (int i = 0; i < positions.size(); i++) {
                     MapPosition start = positions.get(i);
@@ -260,6 +281,7 @@ public class MainActivity extends AppCompatActivity {
                 helloView.setText(aLong + "");
             }
         });*/
+        /*
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -283,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        */
     }
 
     @Override

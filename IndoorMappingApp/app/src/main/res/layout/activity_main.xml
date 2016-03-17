@@ -35,16 +35,19 @@
         <TextView
             android:layout_gravity="right"
             android:id="@+id/x_text"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
             android:layout_gravity="right"
             android:id="@+id/y_text"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
             android:layout_gravity="right"
             android:id="@+id/az_text"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
