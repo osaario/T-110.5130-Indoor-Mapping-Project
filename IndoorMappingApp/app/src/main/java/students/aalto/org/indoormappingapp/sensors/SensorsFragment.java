@@ -7,11 +7,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.HashMap;
 
 import rx.Observable;
 import rx.functions.Action1;
@@ -31,13 +34,10 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
     private Sensor magneticSensor;
     private Sensor accelerationSensor;
 
-    public rx.Observable<Integer> stepObservable;
-    public rx.Observable<Integer> azimuthObservable;
+    private rx.Observable<float[]> stepObservable;
+    public rx.Observable<Integer> stepWithDirectionObservable;
 
-    private PublishSubject<Integer> stepSubject = PublishSubject.create();
-    private PublishSubject<float[]> accelerometerSubject = PublishSubject.create();
-    private PublishSubject<float[]> magneticSubject = PublishSubject.create();
-    private PublishSubject<float[]> rotationSubject = PublishSubject.create();
+    private PublishSubject<float[]> stepSubject = PublishSubject.create();
 
     public SensorsFragment() {
     }
@@ -90,7 +90,15 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
             }
         });*/
 
-        azimuthObservable = rotationSubject.map(new Func1<float[], Integer>() {
+        stepWithDirectionObservable = stepSubject.filter(new Func1<float[], Boolean>() {
+            @Override
+            public Boolean call(float[] floats) {
+                if(floats == null) {
+                    Log.d("","no directio at the time");
+                }
+                return floats != null;
+            }
+        }).map(new Func1<float[], Integer>() {
             @Override
             public Integer call(float[] floats) {
                 float[] rotationMatrix = new float[16];
@@ -112,24 +120,23 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         sensorManager.unregisterListener(this);
     }
 
+    HashMap<Long, float[]> directionAtTime = new HashMap<>();
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         int type = event.sensor.getType();
         if (type == Sensor.TYPE_STEP_DETECTOR)
         {
-            stepSubject.onNext(1);
-        }
-        if (type == Sensor.TYPE_ACCELEROMETER)
-        {
-            accelerometerSubject.onNext(event.values);
-        }
-        if (type == Sensor.TYPE_MAGNETIC_FIELD)
-        {
-            magneticSubject.onNext(event.values);
+            Long secondTimeStamp = (Long)(event.timestamp / 1000000000);
+            float[] direction = directionAtTime.get(secondTimeStamp);
+            stepSubject.onNext(direction);
         }
         if (type == Sensor.TYPE_GAME_ROTATION_VECTOR || type == Sensor.TYPE_ROTATION_VECTOR)
         {
-            rotationSubject.onNext(event.values);
+            Long secondTimeStamp = (Long)(event.timestamp / 1000000000);
+            if (!directionAtTime.containsKey(secondTimeStamp)) {
+                directionAtTime.put(secondTimeStamp, event.values);
+            }
         }
     }
     @Override

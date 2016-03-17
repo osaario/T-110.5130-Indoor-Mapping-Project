@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
+        /*
         Observable<Integer> buttonStepObservable = Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-        }).mergeWith(sensors.stepObservable).replay().refCount();
+        }).mergeWith(sensors.stepWithDirectionObservable).replay().refCount();
 
         buttonStepObservable.doOnNext(new Action1<Integer>() {
             @Override
@@ -181,8 +182,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+                    */
+
         rx.Observable<MapPosition> direction =
-                sensors.azimuthObservable.sample(200, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()).map(new Func1<Integer, MapPosition>() {
+                sensors.stepWithDirectionObservable.map(new Func1<Integer, MapPosition>() {
                     @Override
                     public MapPosition call(Integer azimuth) {
                         double x = Math.cos((double) azimuth * 0.0174532925) * 10;
@@ -199,12 +203,7 @@ public class MainActivity extends AppCompatActivity {
                         return new MapPosition(xx, yy, 0);
                     }
                 });
-        Observable<ArrayList<MapPosition>> positionObs = buttonStepObservable.withLatestFrom(direction, new Func2<Integer, MapPosition, MapPosition>() {
-            @Override
-            public MapPosition call(Integer integer, MapPosition mapPosition) {
-                return mapPosition;
-            }
-        }).scan(new Func2<MapPosition, MapPosition, MapPosition>() {
+        Observable<ArrayList<MapPosition>> positionObs = direction.scan(new Func2<MapPosition, MapPosition, MapPosition>() {
             @Override
             public MapPosition call(MapPosition mapPosition, MapPosition mapPosition2) {
                 if (mapPosition == null) mapPosition = new MapPosition(0, 0, 0);
