@@ -16,13 +16,11 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 import java.util.List;
 
-public class home extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity {
 
 
     private Button btnNext;
     private ListView listview;
-    private RadioGroup radioGroup;
-    private Button rgButton;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -35,28 +33,12 @@ public class home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        addItemsToRadioGroup();
+        addItemsToListView();
         addListenerOnButton();
         addListenerOnListView();
     }
 
 
-
-    private void addItemsToRadioGroup() {
-        radioGroup = (RadioGroup) findViewById(R.id.radioGroup_home);
-
-        for(int i = 0; i < 5; i++) {
-            rgButton  = new RadioButton(this);
-            rgButton.setText("Building" + i);
-            radioGroup.addView(rgButton);
-
-        }
-
-
-        RadioButton rbu1 =(RadioButton)radioGroup.getChildAt(0);
-        int firstButtonId = rbu1.getId();
-        radioGroup.check(firstButtonId);
-    }
 
     private void addListenerOnButton() {
 
@@ -66,7 +48,7 @@ public class home extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                String building = ((RadioButton)findViewById(radioGroup.getCheckedRadioButtonId())).getText().toString();
+                String building = "building1";
                 Intent intent = new Intent(getBaseContext(), MainActivity.class);
                 intent.putExtra("building", building);
                 startActivity(intent);
@@ -79,6 +61,9 @@ public class home extends AppCompatActivity {
 
     }
     private void addItemsToListView() {
-
+        String[] items = {"building1","building2","building3"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, items);
+        ListView listView = (ListView) findViewById(R.id.listView_home);
+        listView.setAdapter(adapter);
     }
 }
