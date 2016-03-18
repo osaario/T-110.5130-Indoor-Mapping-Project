@@ -3,9 +3,11 @@ package students.aalto.org.indoormappingapp;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -18,8 +20,6 @@ import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
 
-
-    private Button btnNext;
     private ListView listview;
 
     @Override
@@ -34,36 +34,29 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         addItemsToListView();
-        addListenerOnButton();
         addListenerOnListView();
     }
 
+    public void addListenerOnListView(){
 
-
-    private void addListenerOnButton() {
-
-        btnNext = (Button) findViewById(R.id.button);
-
-        btnNext.setOnClickListener(new View.OnClickListener() {
-
+        ListView listView = (ListView) findViewById(R.id.listView_home);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                String building = "building1";
-                Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                intent.putExtra("building", building);
+            public void onItemClick(AdapterView<?> adapter, View v, int position,
+                                    long arg3) {
+                String value = (String) adapter.getItemAtPosition(position);
+                Intent intent = new Intent(getBaseContext(), FloorActivity.class);
+                //intent.putExtra("building", value);
                 startActivity(intent);
             }
         });
     }
-    public void addListenerOnListView(){
 
-
-
-    }
     private void addItemsToListView() {
         String[] items = {"building1","building2","building3"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, items);
         ListView listView = (ListView) findViewById(R.id.listView_home);
         listView.setAdapter(adapter);
     }
+
 }
