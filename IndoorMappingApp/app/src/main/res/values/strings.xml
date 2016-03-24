@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IndoorMappingApp</string>
+    <string name="app_name">Indoor Mapping</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello World</string>
     <string name="title_activity_map">map</string>
