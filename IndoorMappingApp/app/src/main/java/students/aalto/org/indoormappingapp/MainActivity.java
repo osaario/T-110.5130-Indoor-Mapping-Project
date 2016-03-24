@@ -53,9 +53,11 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.functions.Func3;
 import rx.schedulers.Schedulers;
 import students.aalto.org.indoormappingapp.deadreckoning.DeadReckoning;
 import students.aalto.org.indoormappingapp.model.MapPosition;
+import students.aalto.org.indoormappingapp.model.RenderData;
 import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -102,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
         final Button leftButton = (Button) findViewById(R.id.button_left);
         final Button stepButton = (Button) findViewById(R.id.button_step);
         final Button rightButton = (Button) findViewById(R.id.button_right);
+        final Button photoButton = (Button) findViewById(R.id.button_photo);
+
 
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -154,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
         SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
         /*
         Observable<Integer> buttonStepObservable = Observable.create(new Observable.OnSubscribe<Integer>() {
@@ -203,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
                         return new MapPosition(xx, yy, 0);
                     }
                 });
+
         Observable<ArrayList<MapPosition>> positionObs = direction.scan(new Func2<MapPosition, MapPosition, MapPosition>() {
             @Override
             public MapPosition call(MapPosition mapPosition, MapPosition mapPosition2) {
@@ -215,18 +221,54 @@ public class MainActivity extends AppCompatActivity {
                 mapPositions.add(integer);
                 return mapPositions;
             }
-        });
-        Observable.combineLatest(positionObs, zoomObservable, new Func2<ArrayList<MapPosition>, Float, Pair<ArrayList<MapPosition>, Float>>() {
+        }).replay(1).refCount();
+
+        Observable<ArrayList<MapPosition>> photoTakenObs = Observable.create(new Observable.OnSubscribe<Integer>() {
+
             @Override
-            public Pair<ArrayList<MapPosition>, Float> call(ArrayList<MapPosition> mapPositions, Float aFloat) {
-                return new Pair<ArrayList<MapPosition>, Float>(mapPositions, aFloat);
+            public void call(final Subscriber<? super Integer> subscriber) {
+                photoButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        subscriber.onNext(0);
+                    }
+                });
             }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Pair<ArrayList<MapPosition>, Float>>() {
+        }).withLatestFrom(positionObs, new Func2<Integer, ArrayList<MapPosition>, MapPosition>() {
             @Override
-            public void call(Pair<ArrayList<MapPosition>, Float> arrayListFloatPair) {
+            public MapPosition call(Integer integer, ArrayList<MapPosition> mapPositions) {
+                if (mapPositions.size() > 0) {
+                    return mapPositions.get(mapPositions.size() - 1);
+                } else {
+                    return null;
+                }
+            }
+        }).filter(new Func1<MapPosition, Boolean>() {
+            @Override
+            public Boolean call(MapPosition mapPosition) {
+                return mapPosition != null;
+            }
+        }).scan(new ArrayList<MapPosition>(), new Func2<ArrayList<MapPosition>, MapPosition, ArrayList<MapPosition>>() {
+            @Override
+            public ArrayList<MapPosition> call(ArrayList<MapPosition> mapPositions, MapPosition integer) {
+                mapPositions.add(integer);
+                return mapPositions;
+            }
+        });
+
+
+        Observable.combineLatest(positionObs, photoTakenObs, zoomObservable, new Func3<ArrayList<MapPosition>, ArrayList<MapPosition>, Float, RenderData>() {
+            @Override
+            public RenderData call(ArrayList<MapPosition> mapPositions, ArrayList<MapPosition> mapPositions2, Float aFloat) {
+                return new RenderData(mapPositions, mapPositions2, aFloat);
+            }
+        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<RenderData>() {
+            @Override
+            public void call(RenderData renderData) {
                 if (mSurfaceHolder == null) return;
 
-                ArrayList<MapPosition> positions = arrayListFloatPair.first;
+                ArrayList<MapPosition> positions = renderData.Positions;
+                ArrayList<MapPosition> photos = renderData.Photos;
                 Canvas canvas = mSurfaceHolder.lockCanvas();
                 if (canvas == null) return;
                 canvas.drawColor(Color.WHITE);
@@ -248,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                     translationY = 0;
                 }
 
-                float scaleX = arrayListFloatPair.second;
+                float scaleX = renderData.ZoomLevel;
                 float scaleY = scaleX;
 
                 canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
@@ -264,6 +306,12 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         canvas.drawCircle(centerX + start.X - translationX, centerY + start.Y - translationY, 10, paint);
                     }
+                }
+                paint.setColor(Color.BLUE);
+                for (int i = 0; i < photos.size(); i++) {
+                    MapPosition start = photos.get(i);
+                    canvas.drawCircle(centerX + start.X - translationX, centerY + start.Y - translationY, 10, paint);
+
                 }
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
 
