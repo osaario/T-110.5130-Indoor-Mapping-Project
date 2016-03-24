@@ -168,7 +168,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }).mergeWith(sensors.stepWithDirectionObservable).replay().refCount();
 
-        buttonStepObservable.doOnNext(new Action1<Integer>() {
+
+
+                    */
+
+        sensors.stepWithDirectionObservable.doOnNext(new Action1<Integer>() {
             @Override
             public void call(Integer integer) {
                 stopText.setVisibility(View.VISIBLE);
@@ -181,10 +185,6 @@ public class MainActivity extends AppCompatActivity {
                 okText.setVisibility(View.VISIBLE);
             }
         });
-
-
-                    */
-
         rx.Observable<MapPosition> direction =
                 sensors.stepWithDirectionObservable.map(new Func1<Integer, MapPosition>() {
                     @Override

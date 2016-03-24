@@ -109,7 +109,7 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
                 //Log.d("test", "rotation 0:" + Math.toDegrees(orientation[0]) + " 1:" + Math.toDegrees(orientation[1]) + " 2:" + Math.toDegrees(orientation[2]));
                 return azimut;
             }
-        });
+        }).replay().refCount();
 
         return inflater.inflate(R.layout.fragment_sensors, container, false);
     }
