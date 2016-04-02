@@ -3,10 +3,12 @@ package students.aalto.org.indoormappingapp.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
+
 /**
  * A location/position on map.
  */
-public class MapPosition implements JSONAble {
+public class MapPosition extends NetworkJSONObject {
     public Integer X;
     public Integer Y;
     public Integer Z;
