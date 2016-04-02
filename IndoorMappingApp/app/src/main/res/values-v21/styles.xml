@@ -8,8 +8,7 @@
     </style>
 
 
-
-    <style name="AppTheme.FloorPopup" >
+    <style name="AppTheme.FloorPopup">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>

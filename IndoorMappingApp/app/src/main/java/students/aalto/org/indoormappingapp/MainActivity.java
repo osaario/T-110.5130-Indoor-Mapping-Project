@@ -466,49 +466,8 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_map) {
             return true;
         }
+
         return super.onOptionsItemSelected(item);
-    }
-
-    public static Observable<Boolean> sendLocation(final float x, final float y, final float z) {
-        final OkHttpClient client = new OkHttpClient();
-        ExecutorService executor = Executors.newFixedThreadPool(3);
-        Callable c = new Callable<Boolean>() {
-
-            @Override
-            public Boolean call() throws Exception {
-                final OutputStream out = new ByteArrayOutputStream();
-                JsonFactory f = new JsonFactory();
-                JsonGenerator g = f.createGenerator(out);
-                g.writeStartObject();
-                g.writeNumberField("xCoordinate", x);
-                g.writeNumberField("yCoordinate", y);
-                g.writeNumberField("zCoordinate", z);
-                g.writeEndObject();
-                g.close();
-                String json = out.toString();
-                Request request = new Request.Builder()
-                        .post(RequestBody.create(MediaType.parse("application/json"), json))
-                        .url("http://requestb.in/wztvrxwz")
-                        .addHeader("Content-Type", "application/json")
-                        .build();
-
-                Response response = client.newCall(request).execute();
-                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                //String jsonResponse = response.body().string();
-                //ObjectMapper mapper = new ObjectMapper();
-                //JsonNode node = mapper.readTree(jsonResponse);
-                //TypeReference<User> typeRef = new TypeReference<User>(){};
-                //User list;
-                //list = mapper.readValue(node.traverse(), typeRef);
-
-                return true;
-            }
-        };
-
-        FutureTask<Boolean> task = new FutureTask<Boolean>(c);
-        executor.execute(task);
-        return Observable.from(task).subscribeOn(Schedulers.newThread());
     }
 
 }

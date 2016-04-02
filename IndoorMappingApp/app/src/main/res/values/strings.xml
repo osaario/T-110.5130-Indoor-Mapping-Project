@@ -14,4 +14,6 @@
     <string name="ok_to_turn">POSITON IS UP TO DATE</string>
     <string name="stop_to_turn">POSITION NOT UP TO DATE</string>
     <string name="take_photo">Take Photo</string>
+    <string name="menu_testing">Testing</string>
+    <string name="title_activity_test">TestActivity</string>
 </resources>
