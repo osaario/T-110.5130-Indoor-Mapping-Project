@@ -20,7 +20,7 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends MenuRouterActivity {
 
     private ListView listview;
 
@@ -34,24 +34,6 @@ public class HomeActivity extends AppCompatActivity {
         addItemsToListView();
         addListenerOnListView();
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_test) {
-            Intent intent = new Intent(getApplicationContext(), TestActivity.class);
-            startActivity(intent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     public void addListenerOnListView(){
