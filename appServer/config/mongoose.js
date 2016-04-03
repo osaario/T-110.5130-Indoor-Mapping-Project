@@ -1,4 +1,4 @@
-
+/*jshint node: true */
 'use strict';
 
 var	config = require('./config'),
@@ -10,7 +10,6 @@ module.exports = function() {
 
 	require('../app/models/Photos');
 	require('../app/models/Locations');
-	require('../app/models/Rotations');
 	require('../app/models/DataSets');
 
 	return db;

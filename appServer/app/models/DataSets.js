@@ -1,12 +1,13 @@
-
+/*jshint node: true */
 'use strict';
 
 var mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
 var DataSetSchema = new Schema({
-	name: { type: String, default: 'first floor'},
-	description: { type: String, default: 'CS first floor plan'},
+	created: {type:Date, default:Date.now},
+	name: {type:String, default:'Unknown'},
+	description: {type:String, default:''},
 });
 
 mongoose.model('DataSet', DataSetSchema);

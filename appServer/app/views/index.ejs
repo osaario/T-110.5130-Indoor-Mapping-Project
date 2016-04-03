@@ -3,7 +3,16 @@
 <head>
 	<title><%= title %></title>
 </head>
-<b
-<h1><%= title %></h1>
+<body>
+	<p><%= title %> :: Current data sets</p>
+	<ul>
+		<% for(var i = 0; i < sets.length; i++) { %>
+		<li>
+			<a href="/api/datasets/<%= sets[i]._id %>">
+				<%= sets[i].name %> (<%= sets[i].created %>)
+			</a>
+		</li>
+		<% } %>
+	</ul>
 </body>
 </html>
