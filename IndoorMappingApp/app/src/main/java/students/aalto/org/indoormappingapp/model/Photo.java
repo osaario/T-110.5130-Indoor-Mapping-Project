@@ -4,46 +4,51 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
-import java.util.List;
 
 import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
 
-/**
- * A stored data set.
- */
-public class DataSet extends NetworkJSONObject {
+public class Photo extends NetworkJSONObject {
     public String ID;
     public Date Created;
-    public String Name;
+    public String FilePath;
+    public double XR;
+    public double YR;
+    public double ZR;
     public String Description;
-    public List<MapPosition> Locations;
 
-    public DataSet(String name, String description) {
+    public Photo(String filePath, double xr, double yr, double zr, String description) {
         ID = null;
         Created = new Date();
-        Name = name;
+        FilePath = filePath;
+        XR = xr;
+        YR = yr;
+        ZR = zr;
         Description = description;
     }
 
-    public DataSet() {
-        new DataSet("unknown", "");
+    public Photo() {
+        new Photo(null, 0, 0, 0, "");
     }
 
     @Override
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("created", toJSONDate(Created));
-        json.put("name", Name);
+        json.put("xRotation", XR);
+        json.put("yRotation", YR);
+        json.put("zRotation", ZR);
         json.put("description", Description);
         return json;
     }
 
     @Override
     public NetworkJSONObject parseJSON(JSONObject json) throws JSONException {
-        DataSet object = new DataSet();
+        Photo object = new Photo();
         object.ID = json.getString("_id");
         object.Created = parseJSONDate(json.getString("created"));
-        object.Name = json.getString("name");
+        object.XR = json.getDouble("xRotation");
+        object.YR = json.getDouble("yRotation");
+        object.ZR = json.getDouble("zRotation");
         object.Description = json.getString("description");
         return object;
     }

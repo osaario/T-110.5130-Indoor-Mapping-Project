@@ -8,43 +8,48 @@ import java.util.List;
 
 import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
 
-/**
- * A stored data set.
- */
-public class DataSet extends NetworkJSONObject {
+public class Location extends NetworkJSONObject {
     public String ID;
     public Date Created;
+    public Integer X;
+    public Integer Y;
+    public Integer Z;
     public String Name;
-    public String Description;
-    public List<MapPosition> Locations;
+    public List<Photo> photos;
 
-    public DataSet(String name, String description) {
+    public Location(Integer x, Integer y, Integer z, String name) {
         ID = null;
         Created = new Date();
+        X = x;
+        Y = y;
+        Z = z;
         Name = name;
-        Description = description;
     }
 
-    public DataSet() {
-        new DataSet("unknown", "");
+    public Location() {
+        new Location(0, 0, 0, "");
     }
 
     @Override
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("created", toJSONDate(Created));
+        json.put("xCoordinate", X);
+        json.put("yCoordinate", Y);
+        json.put("zCoordinate", Z);
         json.put("name", Name);
-        json.put("description", Description);
         return json;
     }
 
     @Override
     public NetworkJSONObject parseJSON(JSONObject json) throws JSONException {
-        DataSet object = new DataSet();
+        Location object = new Location();
         object.ID = json.getString("_id");
         object.Created = parseJSONDate(json.getString("created"));
+        object.X = json.getInt("xCoordinate");
+        object.Y = json.getInt("yCoordinate");
+        object.Z = json.getInt("zCoordinate");
         object.Name = json.getString("name");
-        object.Description = json.getString("description");
         return object;
     }
 }

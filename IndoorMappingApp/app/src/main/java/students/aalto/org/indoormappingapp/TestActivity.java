@@ -9,13 +9,16 @@ import android.widget.TextView;
 import java.util.List;
 
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import students.aalto.org.indoormappingapp.model.DataSet;
+import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
 public class TestActivity extends AppCompatActivity {
+
+    public DataSet selectedDataSet = null;
+    public Location selectedLocation = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +45,8 @@ public class TestActivity extends AppCompatActivity {
                 for (DataSet ds : dataSets) {
                     if (ds.Name.equals("Test 1")) {
 
-                        // Continue immediately with the next task.
-                        return Observable.just(null);
+                        // Skip the second task.
+                        return Observable.just(ds);
                     }
                 }
 
@@ -51,15 +54,40 @@ public class TestActivity extends AppCompatActivity {
                 textView.append("Adding test dataset.\n");
                 DataSet ds = new DataSet("Test 1", "Testing the API.");
                 return NetworkService.saveDataSet(ds);
-            }
-        }).flatMap(new Func1<DataSet, Observable<Boolean>>() {
-            @Override
-            public Observable<Boolean> call(DataSet dataSet) {
 
-                if (dataSet != null) {
-                    textView.append("Created dataset id=" + dataSet.ID);
+            }
+        }).flatMap(new Func1<DataSet, Observable<List<Location>>>() {
+            @Override
+            public Observable<List<Location>> call(DataSet dataSet) {
+
+                selectedDataSet = dataSet;
+                textView.append("Selected set " + selectedDataSet.ID + "\n");
+                return NetworkService.getLocations(selectedDataSet.ID);
+
+            }
+        }).flatMap(new Func1<List<Location>, Observable<Location>>() {
+            @Override
+            public Observable<Location> call(List<Location> locations) {
+
+                textView.append("Received " + locations.size() + " locations.\n");
+                for (Location l : locations) {
+                    if (l.Name.equals("Origo")) {
+                        return Observable.just(l);
+                    }
                 }
+                textView.append("Adding test location.\n");
+                Location l = new Location(0, 0, 0, "Origo");
+                return NetworkService.saveLocation(selectedDataSet.ID, l);
+
+            }
+        }).flatMap(new Func1<Location, Observable<Boolean>>() {
+            @Override
+            public Observable<Boolean> call(Location location) {
+
+                selectedLocation = location;
+                textView.append("Selected location " + selectedLocation.ID + "\n");
                 return Observable.just(true);
+
             }
         }).doOnError(new Action1<Throwable>() {
             @Override
@@ -67,12 +95,12 @@ public class TestActivity extends AppCompatActivity {
 
                 // Handle errors from all tasks.
                 textView.append("Error, all is lost.\n");
+
             }
         }).subscribe(new Action1<Boolean>() {
             @Override
             public void call(Boolean result) {
 
-                // Do something with the data from the last task.
                 textView.append("Finished.\n");
             }
         });
