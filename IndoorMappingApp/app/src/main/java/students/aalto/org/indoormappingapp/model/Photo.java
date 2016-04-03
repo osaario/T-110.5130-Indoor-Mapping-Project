@@ -1,8 +1,13 @@
 package students.aalto.org.indoormappingapp.model;
 
+import android.os.Environment;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
@@ -10,24 +15,28 @@ import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
 public class Photo extends NetworkJSONObject {
     public String ID;
     public Date Created;
-    public String FilePath;
+    public File FilePath;
     public double XR;
     public double YR;
     public double ZR;
     public String Description;
 
-    public Photo(String filePath, double xr, double yr, double zr, String description) {
+    public Photo(double xr, double yr, double zr, String description) throws IOException {
         ID = null;
         Created = new Date();
-        FilePath = filePath;
+        FilePath = createImageFile();
         XR = xr;
         YR = yr;
         ZR = zr;
         Description = description;
     }
 
-    public Photo() {
-        new Photo(null, 0, 0, 0, "");
+    public Photo() throws IOException {
+        new Photo(0, 0, 0, "");
+    }
+
+    public Boolean hasImage() {
+        return FilePath.exists();
     }
 
     @Override
@@ -42,14 +51,24 @@ public class Photo extends NetworkJSONObject {
     }
 
     @Override
-    public NetworkJSONObject parseJSON(JSONObject json) throws JSONException {
-        Photo object = new Photo();
-        object.ID = json.getString("_id");
-        object.Created = parseJSONDate(json.getString("created"));
-        object.XR = json.getDouble("xRotation");
-        object.YR = json.getDouble("yRotation");
-        object.ZR = json.getDouble("zRotation");
-        object.Description = json.getString("description");
-        return object;
+    public NetworkJSONObject empty() throws IOException {
+        return new Photo();
+    }
+
+    @Override
+    public void parseJSON(JSONObject json) throws JSONException, IOException {
+        ID = json.getString("_id");
+        Created = parseJSONDate(json.getString("created"));
+        XR = json.getDouble("xRotation");
+        YR = json.getDouble("yRotation");
+        ZR = json.getDouble("zRotation");
+        Description = json.getString("description");
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "IndoorMapping_" + timeStamp;
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        return File.createTempFile(imageFileName, ".jpg", storageDir);
     }
 }

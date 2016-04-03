@@ -39,12 +39,15 @@ public class DataSet extends NetworkJSONObject {
     }
 
     @Override
-    public NetworkJSONObject parseJSON(JSONObject json) throws JSONException {
-        DataSet object = new DataSet();
-        object.ID = json.getString("_id");
-        object.Created = parseJSONDate(json.getString("created"));
-        object.Name = json.getString("name");
-        object.Description = json.getString("description");
-        return object;
+    public NetworkJSONObject empty() {
+        return new DataSet();
+    }
+
+    @Override
+    public void parseJSON(JSONObject json) throws JSONException {
+        ID = json.getString("_id");
+        Created = parseJSONDate(json.getString("created"));
+        Name = json.getString("name");
+        Description = json.getString("description");
     }
 }

@@ -4,14 +4,15 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 public class ImageDownload implements NetworkObject {
-    public String Path;
+    public File Path;
     public Boolean Success;
 
-    public ImageDownload(String path) {
+    public ImageDownload(File path) {
         Path = path;
         Success = false;
     }

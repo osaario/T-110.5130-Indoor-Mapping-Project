@@ -16,7 +16,8 @@ import java.util.Date;
 public abstract class NetworkJSONObject implements NetworkObject {
 
     abstract public JSONObject toJSON() throws Exception;
-    abstract public NetworkJSONObject parseJSON(JSONObject object) throws Exception;
+    abstract public NetworkJSONObject empty() throws Exception;
+    abstract public void parseJSON(JSONObject object) throws Exception;
 
     protected static final MediaType JSONType = MediaType.parse("application/json; charset=utf-8");
     protected static final SimpleDateFormat ISO8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -46,12 +47,14 @@ public abstract class NetworkJSONObject implements NetworkObject {
             JSONArray jsonArray = (JSONArray) json;
             NetworkJSONObject out[] = new NetworkJSONObject[jsonArray.length()];
             for (int i = 0; i < jsonArray.length(); i++) {
-                out[i] = parseJSON(jsonArray.getJSONObject(i));
+                out[i] = empty();
+                out[i].parseJSON(jsonArray.getJSONObject(i));
             }
             return out;
         }
 
-        NetworkJSONObject out[] = { parseJSON((JSONObject) json) };
+        parseJSON((JSONObject) json);
+        NetworkJSONObject out[] = { this };
         return out;
     }
 }

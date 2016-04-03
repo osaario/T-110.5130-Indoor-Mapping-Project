@@ -32,7 +32,7 @@ public class NetworkService {
 
     final static String SERVICE_URL = "https://indoor-mapping-app-server.herokuapp.com/api/";
     final static int SERVICE_POOL_SIZE = 3;
-    enum Method { GET, POST, PUT };
+    enum Method { GET, POST, PUT, DELETE };
 
     public static Observable<List<DataSet>> getDataSets() {
         return get("datasets", new DataSet());
@@ -57,7 +57,12 @@ public class NetworkService {
     }
 
     public static Observable<List<Photo>> getPhotos(String dataSetID, String locationID) {
-        return get("datasets/" + dataSetID + "/locations/" + locationID + "/photos", new Photo());
+        try {
+            return get("datasets/" + dataSetID + "/locations/" + locationID + "/photos", new Photo());
+        } catch (IOException e) {
+            Log.e("service", "Failed to create file path", e);
+        }
+        return null;
     }
 
     public static Observable<Photo> savePhoto(String dataSetID, String locationID, Photo photo) {
@@ -103,6 +108,8 @@ public class NetworkService {
                     requestBuilder.post(data.toRequestBody());
                 } else if (method == Method.PUT) {
                     requestBuilder.put(data.toRequestBody());
+                } else if (method == Method.DELETE) {
+                    requestBuilder.delete();
                 }
                 Request request = requestBuilder.build();
 

@@ -42,14 +42,17 @@ public class Location extends NetworkJSONObject {
     }
 
     @Override
-    public NetworkJSONObject parseJSON(JSONObject json) throws JSONException {
-        Location object = new Location();
-        object.ID = json.getString("_id");
-        object.Created = parseJSONDate(json.getString("created"));
-        object.X = json.getInt("xCoordinate");
-        object.Y = json.getInt("yCoordinate");
-        object.Z = json.getInt("zCoordinate");
-        object.Name = json.getString("name");
-        return object;
+    public NetworkJSONObject empty() {
+        return new Location();
+    }
+
+    @Override
+    public void parseJSON(JSONObject json) throws JSONException {
+        ID = json.getString("_id");
+        Created = parseJSONDate(json.getString("created"));
+        X = json.getInt("xCoordinate");
+        Y = json.getInt("yCoordinate");
+        Z = json.getInt("zCoordinate");
+        Name = json.getString("name");
     }
 }

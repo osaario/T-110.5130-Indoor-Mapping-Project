@@ -1,11 +1,22 @@
 package students.aalto.org.indoormappingapp;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import rx.Observable;
@@ -13,12 +24,17 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
+import students.aalto.org.indoormappingapp.model.Photo;
+import students.aalto.org.indoormappingapp.services.ImageUpload;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
 public class TestActivity extends AppCompatActivity {
 
+    static final int REQUEST_TAKE_PHOTO = 1;
+
     public DataSet selectedDataSet = null;
     public Location selectedLocation = null;
+    public Photo capturedPhoto = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +47,17 @@ public class TestActivity extends AppCompatActivity {
         if (bar != null) {
             bar.setDisplayHomeAsUpEnabled(true);
         }
+
+        // Add button for testing image uploading.
+        FloatingActionButton button = (FloatingActionButton) findViewById(R.id.test_photo);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (selectedDataSet != null && selectedLocation != null) {
+                    dispatchTakePictureIntent();
+                }
+            }
+        });
 
         final TextView textView = (TextView) findViewById(R.id.textView);
         textView.setText("Created test\n");
@@ -104,5 +131,50 @@ public class TestActivity extends AppCompatActivity {
                 textView.append("Finished.\n");
             }
         });
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            try {
+                capturedPhoto = new Photo(0, 0, 0, "");
+            } catch (IOException ex) {
+                Log.e("test", ex.toString());
+            }
+            if (capturedPhoto != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(capturedPhoto.FilePath
+                ));
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+
+            final TextView textView = (TextView) findViewById(R.id.textView);
+            textView.append("Received an image from camera activity.\n");
+
+            // Store a photo object and upload image.
+            NetworkService.savePhoto(selectedDataSet.ID, selectedLocation.ID, capturedPhoto).flatMap(new Func1<Photo, Observable<ImageUpload>>() {
+                @Override
+                public Observable<ImageUpload> call(Photo photo) {
+                    textView.append("Saved meta " + photo.ID + "\n");
+                    return NetworkService.saveImage(photo);
+                }
+            }).doOnError(new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    textView.append("Error, all is lost.\n");
+                }
+            }).subscribe(new Action1<ImageUpload>() {
+                @Override
+                public void call(ImageUpload imageUpload) {
+                    textView.append("Uploaded image.\n");
+                }
+            });
+        }
     }
 }
