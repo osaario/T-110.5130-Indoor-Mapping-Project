@@ -228,6 +228,11 @@ public class MainActivity extends MenuRouterActivity {
             @Override
             public ArrayList<MapPosition> call(ArrayList<MapPosition> mapPositions, MapPosition integer) {
                 mapPositions.add(integer);
+
+                // Start create location.
+                Intent intent = new Intent(getApplicationContext(), LocationActivity.class);
+                startActivity(intent);
+
                 return mapPositions;
             }
         });
