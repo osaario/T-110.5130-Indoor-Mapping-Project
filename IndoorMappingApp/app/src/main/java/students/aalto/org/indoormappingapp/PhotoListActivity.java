@@ -56,11 +56,11 @@ public class PhotoListActivity extends AppCompatActivity {
                     ArrayList<String> items = new ArrayList<String>();
 
                     for (Photo photo : photos) {
-                        items.add(photo.Created + " building");
+                        items.add(photo.Created.toString());
                     }
 
                     final ArrayAdapter<String> adapter = new ArrayAdapter<String>(myContext, R.layout.listitem, items);
-                    ListView listView = (ListView) findViewById(R.id.listView_photolist);
+                    ListView listView = (ListView) findViewById(R.id.listView_photoList);
                     listView.setAdapter(adapter);
                 }
             });
@@ -73,8 +73,7 @@ public class PhotoListActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-             //   dispatchTakePictureIntent();
-                Log.d("problemmmmmmmmm","True");
+                dispatchTakePictureIntent();
             }
         });
     }
