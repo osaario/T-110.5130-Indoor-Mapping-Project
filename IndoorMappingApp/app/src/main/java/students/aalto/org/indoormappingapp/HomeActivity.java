@@ -1,6 +1,8 @@
 package students.aalto.org.indoormappingapp;
 
+import android.content.Context;
 import android.content.Intent;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -20,9 +22,17 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import students.aalto.org.indoormappingapp.model.DataSet;
+import students.aalto.org.indoormappingapp.model.Location;
+import students.aalto.org.indoormappingapp.services.NetworkService;
+
 public class HomeActivity extends MenuRouterActivity {
 
     private ListView listview;
+    private List<DataSet> loadedDataset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,19 +53,45 @@ public class HomeActivity extends MenuRouterActivity {
             @Override
             public void onItemClick(AdapterView<?> adapter, View v, int position,
                                     long arg3) {
-                String value = (String) adapter.getItemAtPosition(position);
+                Log.v("tag", "position" + position);
+                String buildingName = (String) loadedDataset.get(position).Name;
+                String buildingID = (String) loadedDataset.get(position).ID;
+                Log.v("tag", "ID " + buildingID);
                 Intent intent = new Intent(getBaseContext(), FloorActivity.class);
-                //intent.putExtra("building", value);
+                intent.putExtra("building", buildingName);
+                intent.putExtra("ID", buildingID);
                 startActivity(intent);
             }
         });
     }
 
     private void addItemsToListView() {
-        String[] items = {"building1","building2","building3"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.listitem, items);
-        ListView listView = (ListView) findViewById(R.id.listView_home);
-        listView.setAdapter(adapter);
+
+        final Context myContext = this;
+
+        NetworkService.getDataSets().subscribe(new Action1<List<DataSet>>() {
+
+            @Override
+            public void call(List<DataSet> dataSets) {
+                loadedDataset = dataSets;
+                ArrayList<String> items = new ArrayList<String>();
+
+
+                for (DataSet ds : dataSets) {
+                    items.add(ds.Name + " building");
+                }
+
+                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(myContext, R.layout.listitem, items);
+                ListView listView = (ListView) findViewById(R.id.listView_home);
+                listView.setAdapter(adapter);
+            }
+        });
+
+
+
+
+
+
     }
 
 }
