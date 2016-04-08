@@ -2,7 +2,9 @@ package students.aalto.org.indoormappingapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import java.io.IOException;
@@ -23,6 +26,8 @@ import students.aalto.org.indoormappingapp.services.NetworkService;
 
 public class PhotoListActivity extends AppCompatActivity {
 
+    public Photo capturedPhoto = null;
+    static final int REQUEST_TAKE_PHOTO = 1;
     static public String LOCATION_ID = "locationId";
     static public String DATASET_ID = "datasetId";
     private List<Photo> loadedPhotos;
@@ -61,6 +66,32 @@ public class PhotoListActivity extends AppCompatActivity {
             });
         } catch (IOException e) {
             Log.e("photolist", e.toString());
+        }
+
+
+        Button button = (Button) findViewById(R.id.button_photoList);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+             //   dispatchTakePictureIntent();
+                Log.d("problemmmmmmmmm","True");
+            }
+        });
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            try {
+                capturedPhoto = new Photo(0, 0, 0, "");
+            } catch (IOException ex) {
+                Log.e("test", ex.toString());
+            }
+            if (capturedPhoto != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(capturedPhoto.FilePath
+                ));
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
         }
     }
 
