@@ -216,7 +216,8 @@ public class MainActivity extends MenuRouterActivity {
                 if (mapPositions.size() > 0) {
                     return mapPositions.get(mapPositions.size() - 1);
                 } else {
-                    return null;
+                    //return null;
+                    return new MapPosition(0, 0, 0);
                 }
             }
         }).filter(new Func1<MapPosition, Boolean>() {
