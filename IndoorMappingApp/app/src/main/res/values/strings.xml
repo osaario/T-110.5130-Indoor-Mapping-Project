@@ -16,4 +16,6 @@
     <string name="name">Name</string>
     <string name="save">Save</string>
     <string name="title_activity_photo_list">PhotoList</string>
+    <string name="error_name">Name required</string>
+    <string name="error_connection">Network connection failed</string>
 </resources>

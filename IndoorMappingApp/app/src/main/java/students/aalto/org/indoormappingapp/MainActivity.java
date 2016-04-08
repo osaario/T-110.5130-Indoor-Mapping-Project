@@ -38,10 +38,12 @@ import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 
 public class MainActivity extends MenuRouterActivity {
 
+    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+
     final int gridSize = 100;
     final int gridStep = 80;
     SurfaceHolder mSurfaceHolder;
-    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+    String dataSetID;
     private Uri fileUri;
 
 
@@ -69,6 +71,8 @@ public class MainActivity extends MenuRouterActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        dataSetID = getIntent().getStringExtra("ID");
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
         final TextView xTextView = (TextView) findViewById(R.id.x_text);
@@ -227,11 +231,15 @@ public class MainActivity extends MenuRouterActivity {
             }
         }).scan(new ArrayList<MapPosition>(), new Func2<ArrayList<MapPosition>, MapPosition, ArrayList<MapPosition>>() {
             @Override
-            public ArrayList<MapPosition> call(ArrayList<MapPosition> mapPositions, MapPosition integer) {
-                mapPositions.add(integer);
+            public ArrayList<MapPosition> call(ArrayList<MapPosition> mapPositions, MapPosition last) {
+                mapPositions.add(last);
 
                 // Start create location.
                 Intent intent = new Intent(getApplicationContext(), LocationActivity.class);
+                intent.putExtra(LocationActivity.DATASET_ID, dataSetID);
+                intent.putExtra(LocationActivity.X_COORDINATE, last.X);
+                intent.putExtra(LocationActivity.Y_COORDINATE, last.Y);
+                intent.putExtra(LocationActivity.Z_COORDINATE, last.Z);
                 startActivity(intent);
 
                 return mapPositions;
