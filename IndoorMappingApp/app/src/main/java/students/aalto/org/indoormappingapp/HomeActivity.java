@@ -57,7 +57,10 @@ public class HomeActivity extends MenuRouterActivity {
                 String buildingName = (String) loadedDataset.get(position).Name;
                 String buildingID = (String) loadedDataset.get(position).ID;
                 Log.v("tag", "ID " + buildingID);
-                Intent intent = new Intent(getBaseContext(), FloorActivity.class);
+
+                // Floor activity disabled temporarily
+                //Intent intent = new Intent(getBaseContext(), FloorActivity.class);
+                Intent intent = new Intent(getBaseContext(), MainActivity.class);
                 intent.putExtra("building", buildingName);
                 intent.putExtra("ID", buildingID);
                 startActivity(intent);
