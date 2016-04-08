@@ -53,7 +53,7 @@ public class PhotoListActivity extends AppCompatActivity {
                 }
 
                 final ArrayAdapter<String> adapter = new ArrayAdapter<String>(myContext, R.layout.listitem, items);
-                ListView listView = (ListView) findViewById(R.id.listView_home);
+                ListView listView = (ListView) findViewById(R.id.listView_photolist);
                 listView.setAdapter(adapter);
             }
         });
