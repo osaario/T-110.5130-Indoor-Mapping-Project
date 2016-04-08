@@ -87,11 +87,6 @@ public class HomeActivity extends MenuRouterActivity {
             }
         });
 
-
-
-
-
-
     }
 
 }

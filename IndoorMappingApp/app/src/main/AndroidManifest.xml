@@ -43,12 +43,16 @@
             android:name=".LocationActivity"
             android:label="@string/title_activity_location"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".TestActivity"
             android:label="Testing Stuff"
             android:parentActivityName=".HomeActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".PhotoListActivity"
+            android:label="@string/title_activity_photo_list"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
