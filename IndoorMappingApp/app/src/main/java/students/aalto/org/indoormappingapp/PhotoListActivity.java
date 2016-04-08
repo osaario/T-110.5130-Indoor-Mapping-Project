@@ -7,10 +7,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,25 +42,26 @@ public class PhotoListActivity extends AppCompatActivity {
         String locationId = intent.getStringExtra(LOCATION_ID);
         final Context myContext = this;
 
-        NetworkService.getPhotos(datasetId,locationId).subscribe(new Action1<List<Photo>>() {
+        try {
+            NetworkService.getPhotos(datasetId, locationId).subscribe(new Action1<List<Photo>>() {
 
-            @Override
-            public void call(List<Photo> photos) {
-                loadedPhotos = loadedPhotos;
-                ArrayList<String> items = new ArrayList<String>();
+                @Override
+                public void call(List<Photo> photos) {
 
+                    ArrayList<String> items = new ArrayList<String>();
 
-                for (Photo photo : photos) {
-                    items.add(photo.Created + " building");
+                    for (Photo photo : photos) {
+                        items.add(photo.Created + " building");
+                    }
+
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(myContext, R.layout.listitem, items);
+                    ListView listView = (ListView) findViewById(R.id.listView_photolist);
+                    listView.setAdapter(adapter);
                 }
-
-                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(myContext, R.layout.listitem, items);
-                ListView listView = (ListView) findViewById(R.id.listView_photolist);
-                listView.setAdapter(adapter);
-            }
-        });
-
-
+            });
+        } catch (IOException e) {
+            Log.e("photolist", e.toString());
+        }
     }
 
 }

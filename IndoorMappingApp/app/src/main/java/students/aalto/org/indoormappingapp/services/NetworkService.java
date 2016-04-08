@@ -56,13 +56,8 @@ public class NetworkService {
         return postOrPut("datasets/" + dataSetID + "/locations", location, false);
     }
 
-    public static Observable<List<Photo>> getPhotos(String dataSetID, String locationID) {
-        try {
-            return get("datasets/" + dataSetID + "/locations/" + locationID + "/photos", new Photo());
-        } catch (IOException e) {
-            Log.e("service", "Failed to create file path", e);
-        }
-        return null;
+    public static Observable<List<Photo>> getPhotos(String dataSetID, String locationID) throws IOException {
+        return get("datasets/" + dataSetID + "/locations/" + locationID + "/photos", new Photo());
     }
 
     public static Observable<Photo> savePhoto(String dataSetID, String locationID, Photo photo) {
