@@ -63,7 +63,7 @@ public class TestActivity extends AppCompatActivity {
         textView.setText("Created test\n");
 
         // Define multiple asynchronous tasks after each other using flatMap.
-        NetworkService.getDataSets().flatMap(new Func1<List<DataSet>, Observable<DataSet>>() {
+        NetworkService.getDataSets().switchMap(new Func1<List<DataSet>, Observable<DataSet>>() {
             @Override
             public Observable<DataSet> call(List<DataSet> dataSets) {
 
@@ -83,7 +83,7 @@ public class TestActivity extends AppCompatActivity {
                 return NetworkService.saveDataSet(ds);
 
             }
-        }).flatMap(new Func1<DataSet, Observable<List<Location>>>() {
+        }).switchMap(new Func1<DataSet, Observable<List<Location>>>() {
             @Override
             public Observable<List<Location>> call(DataSet dataSet) {
 
@@ -92,7 +92,7 @@ public class TestActivity extends AppCompatActivity {
                 return NetworkService.getLocations(selectedDataSet.ID);
 
             }
-        }).flatMap(new Func1<List<Location>, Observable<Location>>() {
+        }).switchMap(new Func1<List<Location>, Observable<Location>>() {
             @Override
             public Observable<Location> call(List<Location> locations) {
 
@@ -107,28 +107,31 @@ public class TestActivity extends AppCompatActivity {
                 return NetworkService.saveLocation(selectedDataSet.ID, l);
 
             }
-        }).flatMap(new Func1<Location, Observable<Boolean>>() {
+        }).doOnNext(new Action1<Location>() {
             @Override
-            public Observable<Boolean> call(Location location) {
-
+            public void call(Location location) {
                 selectedLocation = location;
                 textView.append("Selected location " + selectedLocation.ID + "\n");
-                return Observable.just(true);
-
             }
-        }).doOnError(new Action1<Throwable>() {
+            //no need to use flatMap in here
+        }).map(new Func1<Location, Boolean>() {
             @Override
-            public void call(Throwable throwable) {
-
-                // Handle errors from all tasks.
-                textView.append("Error, all is lost.\n");
-
+            public Boolean call(Location location) {
+                return true;
             }
         }).subscribe(new Action1<Boolean>() {
             @Override
             public void call(Boolean result) {
 
                 textView.append("Finished.\n");
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+
+                // Handle errors from all tasks.
+                textView.append("Error, all is lost.\n");
+
             }
         });
     }
