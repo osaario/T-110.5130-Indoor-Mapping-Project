@@ -5,16 +5,19 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import rx.Observable;
@@ -30,46 +33,52 @@ public class PhotoListActivity extends AppCompatActivity {
     static public String LOCATION_ID = "locationId";
     static public String DATASET_ID = "datasetId";
 
-    private String datasetId;
-    private String locationId;
-    private List<Photo> loadedPhotos;
-    private Photo capturedPhoto = null;
+    String datasetId;
+    String locationId;
+    List<Photo> loadedPhotos;
+    Photo capturedPhoto = null;
+    DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
+    ProgressBar progress;
+    ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_list);
-        // imageView_testPhoto
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            bar.setDisplayHomeAsUpEnabled(true);
+        }
 
         //url is like this:
         // https://indoor-mapping-app-server.herokuapp.com/api/datasets/datasetID/locations/locationID/photos
         Intent intent = getIntent();
-
         datasetId = intent.getStringExtra(DATASET_ID);
         locationId = intent.getStringExtra(LOCATION_ID);
-        final Context myContext = this;
 
-        try {
-            NetworkService.getPhotos(datasetId, locationId).subscribe(new Action1<List<Photo>>() {
+        adapter = new ArrayAdapter<String>(this, R.layout.listitem);
+        ListView list = (ListView) findViewById(R.id.listView_photoList);
+        list.setAdapter(adapter);
 
-                @Override
-                public void call(List<Photo> photos) {
+        progress = (ProgressBar) findViewById(R.id.progressBar);
+        progress.setVisibility(View.VISIBLE);
 
-                    ArrayList<String> items = new ArrayList<String>();
+        final Context context = this;
+        NetworkService.getPhotos(datasetId, locationId).subscribe(new Action1<List<Photo>>() {
 
-                    for (Photo photo : photos) {
-                        items.add(photo.Created.toString());
-                    }
-
-                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(myContext, R.layout.listitem, items);
-                    ListView listView = (ListView) findViewById(R.id.listView_photoList);
-                    listView.setAdapter(adapter);
+            @Override
+            public void call(List<Photo> photos) {
+                for (Photo photo : photos) {
+                    adapter.add(df.format(photo.Created));
                 }
-            });
-        } catch (IOException e) {
-            Log.e("photolist", e.toString());
-        }
+                progress.setVisibility(View.GONE);
+            }
+        });
 
         Button button = (Button) findViewById(R.id.button_photoList);
         button.setOnClickListener(new View.OnClickListener() {
@@ -83,24 +92,18 @@ public class PhotoListActivity extends AppCompatActivity {
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            try {
-                capturedPhoto = new Photo(0, 0, 0, "");
-            } catch (IOException ex) {
-                Log.e("test", ex.toString());
-            }
-            if (capturedPhoto != null) {
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(capturedPhoto.FilePath
-                ));
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
+            capturedPhoto = new Photo(0, 0, 0, "");
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(capturedPhoto.FilePath));
+            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            progress.setVisibility(View.VISIBLE);
 
-            // Store a photo object and upload image.
+            final Context context = this;
             NetworkService.savePhoto(datasetId, locationId, capturedPhoto).switchMap(new Func1<Photo, Observable<ImageUpload>>() {
                 @Override
                 public Observable<ImageUpload> call(Photo photo) {
@@ -109,7 +112,15 @@ public class PhotoListActivity extends AppCompatActivity {
             }).subscribe(new Action1<ImageUpload>() {
                 @Override
                 public void call(ImageUpload imageUpload) {
-                    //Add to photo list.
+                    adapter.add(df.format(capturedPhoto.Created));
+                    progress.setVisibility(View.GONE);
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("photos", throwable.toString());
+                    Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
+                    progress.setVisibility(View.GONE);
                 }
             });
         }

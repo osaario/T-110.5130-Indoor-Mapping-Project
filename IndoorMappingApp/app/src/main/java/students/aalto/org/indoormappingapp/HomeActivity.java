@@ -81,9 +81,8 @@ public class HomeActivity extends MenuRouterActivity {
                 loadedDataset = dataSets;
                 ArrayList<String> items = new ArrayList<String>();
 
-
                 for (DataSet ds : dataSets) {
-                    items.add(ds.Name + " building");
+                    items.add(ds.Name);
                 }
 
                 final ArrayAdapter<String> adapter = new ArrayAdapter<String>(myContext, R.layout.listitem, items);

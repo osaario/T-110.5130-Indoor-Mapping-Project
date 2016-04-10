@@ -2,10 +2,8 @@ package students.aalto.org.indoormappingapp.services;
 
 import android.util.Log;
 
-import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
@@ -56,7 +54,7 @@ public class NetworkService {
         return postOrPut("datasets/" + dataSetID + "/locations", location, false);
     }
 
-    public static Observable<List<Photo>> getPhotos(String dataSetID, String locationID) throws IOException {
+    public static Observable<List<Photo>> getPhotos(String dataSetID, String locationID) {
         return get("datasets/" + dataSetID + "/locations/" + locationID + "/photos", new Photo());
     }
 
@@ -137,17 +135,4 @@ public class NetworkService {
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
     }
-
-    /*
-    private static <T extends Object> Observable<T> pickFirst(Observable<List<T>> observable) {
-        return observable.flatMap(new Func1<List<T>, Observable<T>>() {
-            @Override
-            public Observable<T> call(List<T> objects) {
-                if (objects.size() > 0) {
-                    return Observable.just(objects.get(0));
-                }
-                return Observable.error(new Exception("No object in service response."));
-            }
-        });
-    }*/
 }

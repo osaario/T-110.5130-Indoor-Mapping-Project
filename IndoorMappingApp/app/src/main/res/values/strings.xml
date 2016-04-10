@@ -15,7 +15,7 @@
     <string name="title_activity_location">Add Location</string>
     <string name="name">Name</string>
     <string name="save">Save</string>
-    <string name="title_activity_photo_list">PhotoList</string>
+    <string name="title_activity_photo_list">Photos</string>
     <string name="error_name">Name required</string>
     <string name="error_connection">Network connection failed</string>
     <string name="title_activity_location_list">LocationListActivity</string>

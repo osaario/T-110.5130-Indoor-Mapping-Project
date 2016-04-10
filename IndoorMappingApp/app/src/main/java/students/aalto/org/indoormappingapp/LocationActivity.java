@@ -3,6 +3,7 @@ package students.aalto.org.indoormappingapp;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -34,6 +35,11 @@ public class LocationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_location);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            bar.setDisplayHomeAsUpEnabled(true);
+        }
 
         Intent intent = getIntent();
         dataSetID = intent.getStringExtra(DATASET_ID);
@@ -69,20 +75,24 @@ public class LocationActivity extends AppCompatActivity {
 
     protected void createLocation(Location location) {
         final Context context = this;
-        NetworkService.saveLocation(dataSetID, location).doOnError(new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                Log.e("location", throwable.toString());
-                Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
-            }
-        }).subscribe(new Action1<Location>() {
+        NetworkService.saveLocation(dataSetID, location).subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
                 Intent intent = new Intent(context, PhotoListActivity.class);
                 intent.putExtra(PhotoListActivity.DATASET_ID, dataSetID);
                 intent.putExtra(PhotoListActivity.LOCATION_ID, location.ID);
                 startActivity(intent);
+                finish();
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                Log.e("location", throwable.toString());
+                Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
+
                 progress.setVisibility(View.GONE);
+                findViewById(R.id.button_save).setEnabled(true);
+                findViewById(R.id.edit_name).setEnabled(true);
             }
         });
     }

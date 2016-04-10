@@ -3,7 +3,6 @@ package students.aalto.org.indoormappingapp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -13,10 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import rx.Observable;
@@ -110,20 +106,25 @@ public class TestActivity extends AppCompatActivity {
         }).doOnNext(new Action1<Location>() {
             @Override
             public void call(Location location) {
+
                 selectedLocation = location;
                 textView.append("Selected location " + selectedLocation.ID + "\n");
+
             }
             //no need to use flatMap in here
         }).map(new Func1<Location, Boolean>() {
             @Override
             public Boolean call(Location location) {
+
                 return true;
+
             }
         }).subscribe(new Action1<Boolean>() {
             @Override
             public void call(Boolean result) {
 
                 textView.append("Finished.\n");
+
             }
         }, new Action1<Throwable>() {
             @Override
@@ -131,7 +132,6 @@ public class TestActivity extends AppCompatActivity {
 
                 // Handle errors from all tasks.
                 textView.append("Error, all is lost.\n");
-
             }
         });
     }
@@ -139,19 +139,11 @@ public class TestActivity extends AppCompatActivity {
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            try {
-                capturedPhoto = new Photo(0, 0, 0, "");
-            } catch (IOException ex) {
-                Log.e("test", ex.toString());
-            }
-            if (capturedPhoto != null) {
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(capturedPhoto.FilePath
-                ));
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
+            capturedPhoto = new Photo(0, 0, 0, "");
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(capturedPhoto.FilePath));
+            startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
         }
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -167,15 +159,16 @@ public class TestActivity extends AppCompatActivity {
                     textView.append("Saved meta " + photo.ID + "\n");
                     return NetworkService.saveImage(photo);
                 }
-            }).doOnError(new Action1<Throwable>() {
-                @Override
-                public void call(Throwable throwable) {
-                    textView.append("Error, all is lost.\n");
-                }
             }).subscribe(new Action1<ImageUpload>() {
                 @Override
                 public void call(ImageUpload imageUpload) {
                     textView.append("Uploaded image.\n");
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("test", throwable.toString());
+                    textView.append("Error, all is lost.\n");
                 }
             });
         }

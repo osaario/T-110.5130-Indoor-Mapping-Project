@@ -1,6 +1,7 @@
 package students.aalto.org.indoormappingapp.model;
 
 import android.os.Environment;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +22,7 @@ public class Photo extends NetworkJSONObject {
     public double ZR;
     public String Description;
 
-    public Photo(double xr, double yr, double zr, String description) throws IOException {
+    public Photo(double xr, double yr, double zr, String description) {
         ID = null;
         Created = new Date();
         FilePath = createImageFile();
@@ -31,7 +32,7 @@ public class Photo extends NetworkJSONObject {
         Description = description;
     }
 
-    public Photo() throws IOException {
+    public Photo() {
         new Photo(0, 0, 0, "");
     }
 
@@ -65,10 +66,16 @@ public class Photo extends NetworkJSONObject {
         Description = json.getString("description");
     }
 
-    private File createImageFile() throws IOException {
+    private File createImageFile() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "IndoorMapping_" + timeStamp;
-        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(imageFileName, ".jpg", storageDir);
+        File imageFile = null;
+        try {
+            imageFile = File.createTempFile(imageFileName, ".jpg", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
+        } catch (IOException e) {
+            Log.e("photo", "Unlikely error, application will crash and burn soon enough.");
+            Log.e("photo", e.toString());
+        }
+        return imageFile;
     }
 }
