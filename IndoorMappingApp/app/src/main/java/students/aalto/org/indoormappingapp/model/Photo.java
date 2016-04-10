@@ -21,6 +21,7 @@ public class Photo extends NetworkJSONObject {
     public double YR;
     public double ZR;
     public String Description;
+    public String URL;
 
     public Photo(double xr, double yr, double zr, String description) {
         ID = null;
@@ -30,6 +31,7 @@ public class Photo extends NetworkJSONObject {
         YR = yr;
         ZR = zr;
         Description = description;
+        URL = null;
     }
 
     public Photo() {
@@ -64,6 +66,7 @@ public class Photo extends NetworkJSONObject {
         YR = json.getDouble("yRotation");
         ZR = json.getDouble("zRotation");
         Description = json.getString("description");
+        URL = json.getString("image");
     }
 
     private File createImageFile() {
