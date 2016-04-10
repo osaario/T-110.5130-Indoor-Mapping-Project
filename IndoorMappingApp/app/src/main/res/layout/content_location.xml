@@ -13,7 +13,7 @@
     tools:showIn="@layout/activity_location">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <EditText android:id="@+id/edit_name"
@@ -23,7 +23,7 @@
             android:hint="@string/name" />
         <Button android:id="@+id/button_save"
             android:layout_margin="20dp"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/save"
             android:onClick="sendMessage" />

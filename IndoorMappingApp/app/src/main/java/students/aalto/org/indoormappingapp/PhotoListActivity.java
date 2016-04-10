@@ -5,32 +5,35 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
 import rx.functions.Action1;
-import students.aalto.org.indoormappingapp.model.DataSet;
+import rx.functions.Func1;
 import students.aalto.org.indoormappingapp.model.Photo;
+import students.aalto.org.indoormappingapp.services.ImageUpload;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
 public class PhotoListActivity extends AppCompatActivity {
 
-    public Photo capturedPhoto = null;
     static final int REQUEST_TAKE_PHOTO = 1;
     static public String LOCATION_ID = "locationId";
     static public String DATASET_ID = "datasetId";
+
+    private String datasetId;
+    private String locationId;
     private List<Photo> loadedPhotos;
+    private Photo capturedPhoto = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +46,8 @@ public class PhotoListActivity extends AppCompatActivity {
         // https://indoor-mapping-app-server.herokuapp.com/api/datasets/datasetID/locations/locationID/photos
         Intent intent = getIntent();
 
-        String datasetId = intent.getStringExtra(DATASET_ID);
-        String locationId = intent.getStringExtra(LOCATION_ID);
+        datasetId = intent.getStringExtra(DATASET_ID);
+        locationId = intent.getStringExtra(LOCATION_ID);
         final Context myContext = this;
 
         try {
@@ -68,7 +71,6 @@ public class PhotoListActivity extends AppCompatActivity {
             Log.e("photolist", e.toString());
         }
 
-
         Button button = (Button) findViewById(R.id.button_photoList);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,6 +93,25 @@ public class PhotoListActivity extends AppCompatActivity {
                 ));
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+
+            // Store a photo object and upload image.
+            NetworkService.savePhoto(datasetId, locationId, capturedPhoto).switchMap(new Func1<Photo, Observable<ImageUpload>>() {
+                @Override
+                public Observable<ImageUpload> call(Photo photo) {
+                    return NetworkService.saveImage(photo);
+                }
+            }).subscribe(new Action1<ImageUpload>() {
+                @Override
+                public void call(ImageUpload imageUpload) {
+                    //Add to photo list.
+                }
+            });
         }
     }
 

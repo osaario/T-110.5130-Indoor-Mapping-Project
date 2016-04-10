@@ -45,24 +45,25 @@ public class LocationActivity extends AppCompatActivity {
         progress.setVisibility(View.GONE);
 
         final Context context = this;
+        final Button save = (Button) findViewById(R.id.button_save);
 
-        Button save = (Button) findViewById(R.id.button_save);
         save.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                if (progress.getVisibility() == View.GONE) {
 
-                    EditText name = (EditText) findViewById(R.id.edit_name);
-                    if (name.getText().toString().matches("")) {
-                        Toast.makeText(context, context.getResources().getString(R.string.error_name), Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    progress.setVisibility(View.VISIBLE);
-                    createLocation(new Location(x, y, z, name.getText().toString()));
+                EditText name = (EditText) findViewById(R.id.edit_name);
+                if (name.getText().toString().matches("")) {
+                    Toast.makeText(context, context.getResources().getString(R.string.error_name), Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                save.setEnabled(false);
+                name.setEnabled(false);
+                progress.setVisibility(View.VISIBLE);
+                createLocation(new Location(x, y, z, name.getText().toString()));
             }
+
         });
     }
 
