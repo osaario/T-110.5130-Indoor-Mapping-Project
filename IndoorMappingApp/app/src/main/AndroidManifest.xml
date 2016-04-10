@@ -28,6 +28,7 @@
         <activity
             android:name=".FloorActivity"
             android:label="@string/title_activity_floor"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.FloorPopup" />
         <activity
             android:name=".MainActivity"
@@ -42,20 +43,24 @@
         <activity
             android:name=".LocationActivity"
             android:label="@string/title_activity_location"
+            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LocationListActivity"
             android:label="@string/title_activity_location_list"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".PhotoListActivity"
             android:label="@string/title_activity_photo_list"
+            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".TestActivity"
             android:label="Testing Stuff"
+            android:screenOrientation="portrait"
             android:parentActivityName=".HomeActivity"
             android:theme="@style/AppTheme.NoActionBar" />
     </application>

@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -61,6 +62,16 @@ public class LocationListActivity extends AppCompatActivity {
         listAdapter = new LocationListAdapter(this, 0);
 
         locationListView.setAdapter(listAdapter);
+
+        locationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Location location = listAdapter.getItem(i);
+                ApplicationState.Instance().setSelectedLocation(location);
+                Intent intent = new Intent(getApplicationContext(), PhotoListActivity.class);
+                startActivity(intent);
+            }
+        });
 
         progressBar.setVisibility(View.VISIBLE);
         loadSubscription = NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID)

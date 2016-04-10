@@ -23,6 +23,8 @@ import java.util.List;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import students.aalto.org.indoormappingapp.model.ApplicationState;
+import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.model.Photo;
 import students.aalto.org.indoormappingapp.services.ImageUpload;
 import students.aalto.org.indoormappingapp.services.NetworkService;
@@ -58,9 +60,17 @@ public class PhotoListActivity extends AppCompatActivity {
 
         //url is like this:
         // https://indoor-mapping-app-server.herokuapp.com/api/datasets/datasetID/locations/locationID/photos
+
+
         Intent intent = getIntent();
+        /*
         datasetId = intent.getStringExtra(DATASET_ID);
         locationId = intent.getStringExtra(LOCATION_ID);
+        */
+        datasetId = ApplicationState.Instance().getSelectedDataSet().ID;
+        locationId = ApplicationState.Instance().getSelectedLocation().ID;
+
+
 
         progress = (ProgressBar) findViewById(R.id.progressBar);
         progress.setVisibility(View.VISIBLE);

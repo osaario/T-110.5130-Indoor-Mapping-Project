@@ -14,6 +14,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import rx.functions.Action1;
+import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
@@ -79,8 +80,7 @@ public class LocationActivity extends AppCompatActivity {
             @Override
             public void call(Location location) {
                 Intent intent = new Intent(context, PhotoListActivity.class);
-                intent.putExtra(PhotoListActivity.DATASET_ID, dataSetID);
-                intent.putExtra(PhotoListActivity.LOCATION_ID, location.ID);
+                ApplicationState.Instance().setSelectedLocation(location);
                 startActivity(intent);
                 finish();
             }

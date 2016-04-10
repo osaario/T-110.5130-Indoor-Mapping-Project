@@ -11,6 +11,7 @@ public class ApplicationState {
     private static ApplicationState _instance;
 
     private DataSet selectedDataSet;
+    private Location selectedLocation;
 
     public static ApplicationState Instance() {
         if (_instance == null) {
@@ -25,5 +26,13 @@ public class ApplicationState {
 
     public void setSelectedDataSet(DataSet selectedDataSet) {
         this.selectedDataSet = selectedDataSet;
+    }
+
+    public Location getSelectedLocation() {
+        return selectedLocation;
+    }
+
+    public void setSelectedLocation(Location selectedLocation) {
+        this.selectedLocation = selectedLocation;
     }
 }
