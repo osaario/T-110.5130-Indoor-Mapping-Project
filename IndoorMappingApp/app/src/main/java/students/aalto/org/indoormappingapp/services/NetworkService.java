@@ -66,7 +66,7 @@ public class NetworkService {
     }
 
     public static Observable<ImageDownload> getImage(Photo photo) {
-        return get("images/" + photo.ID, new ImageDownload(photo.FilePath)).map(new Func1<List<ImageDownload>, ImageDownload>() {
+        return get("images/" + photo.ID, new ImageDownload(photo.createFilePath())).map(new Func1<List<ImageDownload>, ImageDownload>() {
             @Override
             public ImageDownload call(List<ImageDownload> imageDownloads) {
                 return imageDownloads.get(0);
@@ -75,7 +75,7 @@ public class NetworkService {
     }
 
     public static Observable<ImageUpload> saveImage(Photo photo) {
-        return postOrPut("images/" + photo.ID, new ImageUpload(photo.FilePath), false);
+        return postOrPut("images/" + photo.ID, new ImageUpload(photo.createFilePath()), false);
     }
 
     private static <T extends NetworkObject> Observable<List<T>> get(String path, T empty) {

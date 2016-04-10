@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
@@ -23,6 +24,7 @@ public class DataSet extends NetworkJSONObject {
         Created = new Date();
         Name = name;
         Description = description;
+        Locations = new LinkedList<>();
     }
 
     public DataSet() {

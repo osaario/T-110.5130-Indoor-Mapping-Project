@@ -1,9 +1,11 @@
 package students.aalto.org.indoormappingapp.model;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
@@ -15,7 +17,7 @@ public class Location extends NetworkJSONObject {
     public Integer Y;
     public Integer Z;
     public String Name;
-    public List<Photo> photos;
+    public List<Photo> Photos;
 
     public Location(Integer x, Integer y, Integer z, String name) {
         ID = null;
@@ -24,6 +26,7 @@ public class Location extends NetworkJSONObject {
         Y = y;
         Z = z;
         Name = name;
+        Photos = new LinkedList<>();
     }
 
     public Location() {
@@ -54,5 +57,14 @@ public class Location extends NetworkJSONObject {
         Y = json.getInt("yCoordinate");
         Z = json.getInt("zCoordinate");
         Name = json.getString("name");
+
+        JSONArray photos = json.getJSONArray("photos");
+        if (photos != null) {
+            for (int i = 0; i < photos.length(); i++) {
+                Photo p = new Photo();
+                p.parseJSON(photos.getJSONObject(i));
+                Photos.add(p);
+            }
+        }
     }
 }
