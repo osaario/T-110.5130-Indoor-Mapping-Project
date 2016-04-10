@@ -68,7 +68,12 @@ public class NetworkService {
     }
 
     public static Observable<ImageDownload> getImage(Photo photo) {
-        return pickFirst(get("images/" + photo.ID, new ImageDownload(photo.FilePath)));
+        return get("images/" + photo.ID, new ImageDownload(photo.FilePath)).map(new Func1<List<ImageDownload>, ImageDownload>() {
+            @Override
+            public ImageDownload call(List<ImageDownload> imageDownloads) {
+                return imageDownloads.get(0);
+            }
+        });
     }
 
     public static Observable<ImageUpload> saveImage(Photo photo) {
@@ -80,12 +85,12 @@ public class NetworkService {
     }
 
     private static <T extends NetworkObject> Observable<T> postOrPut(String path, T data, Boolean updateFlag) {
-        Observable<List<T>> observable = null;
-        if (updateFlag) {
-            return pickFirst(requestService(path, Method.PUT, data));
-        } else {
-            return pickFirst(requestService(path, Method.POST, data));
-        }
+        return requestService(path, updateFlag ? Method.PUT : Method.POST, data).map(new Func1<List<T>, T>() {
+            @Override
+            public T call(List<T> ts) {
+                return ts.get(0);
+            }
+        });
     }
 
     private static <T extends NetworkObject> Observable<List<T>> requestService(final String path, final Method method, final T data) {
@@ -133,6 +138,7 @@ public class NetworkService {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    /*
     private static <T extends Object> Observable<T> pickFirst(Observable<List<T>> observable) {
         return observable.flatMap(new Func1<List<T>, Observable<T>>() {
             @Override
@@ -143,5 +149,5 @@ public class NetworkService {
                 return Observable.error(new Exception("No object in service response."));
             }
         });
-    }
+    }*/
 }
