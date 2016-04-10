@@ -26,3 +26,15 @@ exports.error = function(err, req, res, next) {
 		return next(err);
 	}
 };
+
+function listRecursion(list, eachCallback, finalCallback, i) {
+	i = i || 0;
+	if (i < list.length) {
+		eachCallback(i, function() {
+			listRecursion(list, eachCallback, finalCallback, i+1);
+		});
+	} else {
+		finalCallback();
+	}
+}
+exports.foreach = listRecursion;

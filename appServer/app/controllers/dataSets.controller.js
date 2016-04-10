@@ -5,7 +5,8 @@ var mongoose = require('mongoose'),
 	DataSet = mongoose.model('DataSet'),
 	PhotoLocation = mongoose.model('Location'),
 	Photo = mongoose.model('Photo'),
-	G = require('./general');
+	G = require('./general'),
+	lwip = require('lwip');
 
 var extend = require('util')._extend;
 
@@ -26,14 +27,21 @@ exports.update = function(req, res, next) {
 };
 
 exports.delete = function(req, res, next) {
-	DataSet.findByIdAndRemove(
-		req.params.datasetId,
-		G.onSuccess(next, res)
-	);
+	PhotoLocation.find({dataSet:req.params.datasetId}).exec(G.onSuccess(next, function(locations) {
+		G.foreach(locations, function(i, nextFor) {
+			Photo.remove({location:locations[i]}, function(err, doc) {
+				nextFor();
+			});
+		}, function() {
+			PhotoLocation.remove({dataSet:req.params.datasetId}, function(err, doc) {
+				DataSet.findByIdAndRemove(req.params.datasetId, G.onSuccess(next, res));
+			});
+		});
+	}));
 };
 
 exports.listLocations = function(req, res, next) {
-	PhotoLocation.find({dataSet:req.params.datasetId}).exec(G.onSuccess(next, res));
+	PhotoLocation.find({dataSet:req.params.datasetId}).populate('photos').exec(G.onSuccess(next, res));
 };
 
 exports.createLocation = function(req, res, next) {
@@ -58,10 +66,12 @@ exports.updateLocation = function(req, res, next) {
 };
 
 exports.deleteLocation = function(req, res, next) {
-	PhotoLocation.findOneAndRemove(
-		{_id:req.params.locationId, dataSet:req.params.datasetId},
-		G.onSuccess(next, res)
-	);
+	Photo.remove({location:req.params.locationId}, function(err, docs) {
+		PhotoLocation.findOneAndRemove(
+			{_id:req.params.locationId, dataSet:req.params.datasetId},
+			G.onSuccess(next, res)
+		);
+	});
 };
 
 exports.listPhotos = function(req, res, next) {
@@ -73,7 +83,12 @@ exports.createPhoto = function(req, res, next) {
 		PhotoLocation.findById(req.params.locationId, G.onSuccess(next, function(location) {
 			var doc = extend({}, req.body);
 			doc.location = location._id;
-			Photo.create(doc, G.onSuccess(next, res));
+			Photo.create(doc, G.onSuccess(next, function(photo) {
+				location.photos.push(photo._id);
+				location.save(G.onSuccess(next, function(doc) {
+					res.json(photo);
+				}));
+			}));
 		}));
 	}));
 };
@@ -103,6 +118,23 @@ exports.getImage = function(req, res, next) {
 	}));
 };
 
+exports.getImageScaled = function(req, res, next) {
+	var size = req.params.size == 'tiny' ? [200,200] : [1080,1920];
+	Photo.findById(req.params.photoId).exec(G.onSuccess(next, function(photo) {
+		if (photo.image.data !== undefined) {
+			lwip.open(photo.image.data, 'jpg', G.onSuccess(next, function(image) {
+				image.contain(size[0], size[1], G.onSuccess(next, function(image) {
+					image.toBuffer('jpg', G.onSuccess(next, function(buffer) {
+						res.contentType('image/jpeg').send(buffer);
+					}));
+				}));
+			}));
+		} else {
+			res.status(404).json({'error':'Missing image'});
+		}
+	}));
+};
+
 exports.uploadImage = function(req, res, next) {
 	Photo.findById(req.params.photoId).exec(G.onSuccess(next, function(photo) {
 		req.busboy.on('file', function(fieldname, file, filename, encoding, contentType) {
@@ -124,22 +156,12 @@ exports.uploadImage = function(req, res, next) {
 	}));
 };
 
-function photoRecursion(res, next, i, out) {
-	if (i < out.locations.length) {
-		Photo.find({location:out.locations[i]._id}).exec(G.onSuccess(next, function(photos) {
-			out.locations[i].photos = photos.map(function(o) { return o.toJSON(); });
-			return photoRecursion(res, next, i+1, out);
-		}));
-	} else {
-		res.json(out);
-	}
-}
 exports.details = function(req, res, next) {
 	DataSet.findById(req.params.datasetId, G.onSuccess(next, function(dataset) {
 		var out = dataset.toJSON();
-		PhotoLocation.find({dataSet:dataset._id}).exec(G.onSuccess(next, function(locations) {
-			out.locations = locations.map(function(o) { return o.toJSON(); });
-			return photoRecursion(res, next, 0, out);
+		PhotoLocation.find({dataSet:dataset._id}).populate('photos').exec(G.onSuccess(next, function(locations) {
+			out.locations = locations;
+			res.json(out);
 		}));
 	}));
 };

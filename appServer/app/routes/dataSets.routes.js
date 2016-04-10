@@ -30,4 +30,7 @@ module.exports = function(app) {
 	app.route('/api/images/:photoId')
 		.get(dataSets.getImage)
 		.post(dataSets.uploadImage);
+
+	app.route('/api/images/:photoId/:size')
+		.get(dataSets.getImageScaled);
 };
