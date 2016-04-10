@@ -25,6 +25,7 @@ import java.util.List;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.services.NetworkService;
@@ -60,7 +61,8 @@ public class HomeActivity extends MenuRouterActivity {
 
                 // Floor activity disabled temporarily
                 //Intent intent = new Intent(getBaseContext(), FloorActivity.class);
-                Intent intent = new Intent(getBaseContext(), MainActivity.class);
+                ApplicationState.Instance().setSelectedDataSet(loadedDataset.get(position));
+                Intent intent = new Intent(getBaseContext(), LocationListActivity.class);
                 intent.putExtra("building", buildingName);
                 intent.putExtra("ID", buildingID);
                 startActivity(intent);

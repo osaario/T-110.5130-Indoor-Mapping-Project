@@ -18,4 +18,7 @@
     <string name="title_activity_photo_list">PhotoList</string>
     <string name="error_name">Name required</string>
     <string name="error_connection">Network connection failed</string>
+    <string name="title_activity_location_list">LocationListActivity</string>
+    <string name="n_photos">photos</string>
+    <string name="no_photos">No photos yet</string>
 </resources>
