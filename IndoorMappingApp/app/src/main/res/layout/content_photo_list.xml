@@ -13,29 +13,14 @@
     tools:showIn="@layout/activity_photo_list">
 
     <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/listView_photoList"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/button_photoList"
-        android:layout_below="@+id/toolbar" />
-
-    <Button
-        android:layout_margin="20dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Take photo"
-        android:id="@+id/button_photoList"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_height="match_parent"
+        android:id="@+id/listView_photoList" />
 
     <ProgressBar
+        android:layout_width="match_parent"
         android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/activity_vertical_margin" />
+        android:indeterminate="true"
+        android:layout_height="match_parent" />
 
 </RelativeLayout>

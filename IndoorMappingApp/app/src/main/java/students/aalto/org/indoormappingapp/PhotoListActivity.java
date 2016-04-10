@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -40,6 +40,7 @@ public class PhotoListActivity extends AppCompatActivity {
     DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
     ProgressBar progress;
+    FloatingActionButton button;
     ArrayAdapter<String> adapter;
 
     @Override
@@ -61,12 +62,20 @@ public class PhotoListActivity extends AppCompatActivity {
         datasetId = intent.getStringExtra(DATASET_ID);
         locationId = intent.getStringExtra(LOCATION_ID);
 
+        progress = (ProgressBar) findViewById(R.id.progressBar);
+        progress.setVisibility(View.VISIBLE);
+
+        button = (FloatingActionButton) findViewById(R.id.fab);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dispatchTakePictureIntent();
+            }
+        });
+
         adapter = new ArrayAdapter<String>(this, R.layout.listitem);
         ListView list = (ListView) findViewById(R.id.listView_photoList);
         list.setAdapter(adapter);
-
-        progress = (ProgressBar) findViewById(R.id.progressBar);
-        progress.setVisibility(View.VISIBLE);
 
         final Context context = this;
         NetworkService.getPhotos(datasetId, locationId).subscribe(new Action1<List<Photo>>() {
@@ -77,14 +86,6 @@ public class PhotoListActivity extends AppCompatActivity {
                     adapter.add(df.format(photo.Created));
                 }
                 progress.setVisibility(View.GONE);
-            }
-        });
-
-        Button button = (Button) findViewById(R.id.button_photoList);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dispatchTakePictureIntent();
             }
         });
     }
@@ -102,6 +103,7 @@ public class PhotoListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             progress.setVisibility(View.VISIBLE);
+            button.setEnabled(false);
 
             final Context context = this;
             NetworkService.savePhoto(datasetId, locationId, capturedPhoto).switchMap(new Func1<Photo, Observable<ImageUpload>>() {
@@ -114,6 +116,7 @@ public class PhotoListActivity extends AppCompatActivity {
                 public void call(ImageUpload imageUpload) {
                     adapter.add(df.format(capturedPhoto.Created));
                     progress.setVisibility(View.GONE);
+                    button.setEnabled(true);
                 }
             }, new Action1<Throwable>() {
                 @Override
@@ -121,6 +124,7 @@ public class PhotoListActivity extends AppCompatActivity {
                     Log.e("photos", throwable.toString());
                     Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
                     progress.setVisibility(View.GONE);
+                    button.setEnabled(true);
                 }
             });
         }
