@@ -17,4 +17,5 @@
         android:id="@+id/location_list_progress"
         android:indeterminate="true"
         android:layout_height="match_parent" />
+
 </FrameLayout>

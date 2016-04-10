@@ -1,6 +1,7 @@
 package students.aalto.org.indoormappingapp.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +35,9 @@ public class LocationListAdapter extends ArrayAdapter<Location>{
         // Populate the data into the template view using the data object
         name.setText(location.Name);
         created.setText(location.Created.toString());
-        if(location.photos != null) {
-            n_photos.setText(location.photos.size() + " " + parent.getContext().getString(R.string.n_photos));
+        if(location.Photos != null) {
+            Log.d("ada", location.Photos.toString());
+            n_photos.setText(location.Photos.size() + " " + parent.getContext().getString(R.string.n_photos));
         } else {
             n_photos.setText(R.string.no_photos);
         }

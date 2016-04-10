@@ -104,7 +104,7 @@ public class PhotoListActivity extends AppCompatActivity {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             capturedPhoto = new Photo(0, 0, 0, "");
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(capturedPhoto.FilePath));
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(capturedPhoto.createFilePath()));
             startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
         }
     }

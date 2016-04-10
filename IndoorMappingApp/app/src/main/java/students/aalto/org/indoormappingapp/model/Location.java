@@ -4,8 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
@@ -26,11 +26,11 @@ public class Location extends NetworkJSONObject {
         Y = y;
         Z = z;
         Name = name;
-        Photos = new LinkedList<>();
+        Photos = new ArrayList<Photo>();
     }
 
     public Location() {
-        new Location(0, 0, 0, "");
+        this(0, 0, 0, "");
     }
 
     @Override
@@ -58,11 +58,11 @@ public class Location extends NetworkJSONObject {
         Z = json.getInt("zCoordinate");
         Name = json.getString("name");
 
-        JSONArray photos = json.getJSONArray("photos");
-        if (photos != null) {
-            for (int i = 0; i < photos.length(); i++) {
+        JSONArray jsonArray = json.getJSONArray("photos");
+        if (jsonArray != null) {
+            for (int i = 0; i < jsonArray.length(); i++) {
                 Photo p = new Photo();
-                p.parseJSON(photos.getJSONObject(i));
+                p.parseJSON(jsonArray.getJSONObject(i));
                 Photos.add(p);
             }
         }

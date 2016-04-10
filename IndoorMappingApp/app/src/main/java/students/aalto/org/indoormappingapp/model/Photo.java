@@ -37,7 +37,7 @@ public class Photo extends NetworkJSONObject {
     }
 
     public Photo() {
-        new Photo(0, 0, 0, "");
+        this(0, 0, 0, "");
     }
 
     public Boolean hasImage() {

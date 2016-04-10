@@ -28,7 +28,7 @@ public class DataSet extends NetworkJSONObject {
     }
 
     public DataSet() {
-        new DataSet("unknown", "");
+        this("unknown", "");
     }
 
     @Override

@@ -2,52 +2,59 @@ package students.aalto.org.indoormappingapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.provider.ContactsContract;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Spinner;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.DataSet;
-import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
 public class HomeActivity extends MenuRouterActivity {
 
-    private ListView listview;
-    private List<DataSet> loadedDataset;
+    ProgressBar progress;
+    List<DataSet> loadedDataset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_home);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        addItemsToListView();
+        progress = (ProgressBar) findViewById(R.id.progressBar);
+        progress.setVisibility(View.GONE);
+
         addListenerOnListView();
 
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), DataSetActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
-    public void addListenerOnListView(){
+    @Override
+    protected void onResume() {
+        super.onResume();
+        addItemsToListView();
+    }
+
+    public void addListenerOnListView() {
 
         ListView listView = (ListView) findViewById(R.id.listView_home);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -71,8 +78,9 @@ public class HomeActivity extends MenuRouterActivity {
     }
 
     private void addItemsToListView() {
+        progress.setVisibility(View.VISIBLE);
 
-        final Context myContext = this;
+        final Context context = this;
 
         NetworkService.getDataSets().subscribe(new Action1<List<DataSet>>() {
 
@@ -85,9 +93,20 @@ public class HomeActivity extends MenuRouterActivity {
                     items.add(ds.Name);
                 }
 
-                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(myContext, R.layout.listitem, items);
+                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, R.layout.listitem, items);
                 ListView listView = (ListView) findViewById(R.id.listView_home);
                 listView.setAdapter(adapter);
+
+                progress.setVisibility(View.GONE);
+
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                Log.e("location", throwable.toString());
+                Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
+
+                progress.setVisibility(View.GONE);
             }
         });
 

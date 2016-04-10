@@ -1,24 +1,26 @@
 <resources>
     <string name="app_name">Indoor Mapping</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_camera">CameraActivity</string>
+    <string name="title_activity_floor">FloorActivity</string>
     <string name="turn_left">Left</string>
     <string name="take_step">Step</string>
     <string name="turn_right">Right</string>
     <string name="minus">-</string>
     <string name="plus">+</string>
-    <string name="title_activity_floor">FloorActivity</string>
     <string name="ok_to_walk">OK TO WALK</string>
     <string name="ok_to_turn">POSITON IS UP TO DATE</string>
     <string name="stop_to_turn">POSITION NOT UP TO DATE</string>
     <string name="take_photo">Take Photo</string>
-    <string name="title_activity_location">Add Location</string>
-    <string name="name">Name</string>
-    <string name="save">Save</string>
-    <string name="title_activity_photo_list">Photos</string>
-    <string name="error_name">Name required</string>
-    <string name="error_connection">Network connection failed</string>
     <string name="title_activity_location_list">LocationListActivity</string>
     <string name="n_photos">photos</string>
     <string name="no_photos">No photos yet</string>
+    <string name="title_activity_location">Add Location</string>
+    <string name="title_activity_data_set">Create New Dataset</string>
+    <string name="name">Name</string>
+    <string name="description">Description</string>
+    <string name="save">Save</string>
+    <string name="error_name">Name required</string>
+    <string name="error_connection">Network connection failed</string>
+    <string name="title_activity_photo_list">Photos</string>
+    <string name="title_activity_camera">CameraActivity</string>
 </resources>

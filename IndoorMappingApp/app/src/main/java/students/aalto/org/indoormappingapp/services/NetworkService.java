@@ -75,7 +75,7 @@ public class NetworkService {
     }
 
     public static Observable<ImageUpload> saveImage(Photo photo) {
-        return postOrPut("images/" + photo.ID, new ImageUpload(photo.createFilePath()), false);
+        return postOrPut("images/" + photo.ID, new ImageUpload(photo.FilePath), false);
     }
 
     private static <T extends NetworkObject> Observable<List<T>> get(String path, T empty) {
