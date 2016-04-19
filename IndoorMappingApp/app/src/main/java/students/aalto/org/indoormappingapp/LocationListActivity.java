@@ -86,12 +86,6 @@ public class LocationListActivity extends AppCompatActivity {
                         listAdapter.clear();
                         listAdapter.addAll(locations);
                     }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(LocationListActivity.this, throwable.getLocalizedMessage(), Toast.LENGTH_LONG);
-                    }
                 });
     }
 

@@ -41,6 +41,7 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".CameraActivity"
@@ -51,6 +52,7 @@
             android:name=".LocationListActivity"
             android:label="@string/title_activity_location_list"
             android:parentActivityName=".HomeActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

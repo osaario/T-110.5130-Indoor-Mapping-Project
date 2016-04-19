@@ -58,7 +58,12 @@ public class Location extends NetworkJSONObject {
         Z = json.getInt("zCoordinate");
         Name = json.getString("name");
 
-        JSONArray jsonArray = json.getJSONArray("photos");
+        JSONArray jsonArray;
+        try {
+            jsonArray = json.getJSONArray("photos");
+        } catch (JSONException e) {
+            jsonArray = null;
+        }
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 Photo p = new Photo();
