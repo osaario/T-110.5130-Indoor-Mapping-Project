@@ -23,6 +23,7 @@ import java.util.List;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import students.aalto.org.indoormappingapp.adapters.PhotoListAdapter;
 import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.model.Photo;
@@ -43,7 +44,7 @@ public class PhotoListActivity extends AppCompatActivity {
 
     ProgressBar progress;
     FloatingActionButton button;
-    ArrayAdapter<String> adapter;
+    PhotoListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +84,7 @@ public class PhotoListActivity extends AppCompatActivity {
             }
         });
 
-        adapter = new ArrayAdapter<String>(this, R.layout.listitem);
+        adapter = new PhotoListAdapter(this, R.layout.listitem);
         ListView list = (ListView) findViewById(R.id.listView_photoList);
         list.setAdapter(adapter);
 
@@ -92,9 +93,8 @@ public class PhotoListActivity extends AppCompatActivity {
 
             @Override
             public void call(List<Photo> photos) {
-                for (Photo photo : photos) {
-                    adapter.add(df.format(photo.Created));
-                }
+                adapter.clear();
+                adapter.addAll(photos);
                 progress.setVisibility(View.GONE);
             }
         });
@@ -124,7 +124,7 @@ public class PhotoListActivity extends AppCompatActivity {
             }).subscribe(new Action1<ImageUpload>() {
                 @Override
                 public void call(ImageUpload imageUpload) {
-                    adapter.add(df.format(capturedPhoto.Created));
+                    adapter.add(capturedPhoto);
                     progress.setVisibility(View.GONE);
                     button.setEnabled(true);
                 }
