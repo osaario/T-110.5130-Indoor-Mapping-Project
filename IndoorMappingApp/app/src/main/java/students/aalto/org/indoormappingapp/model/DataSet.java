@@ -17,6 +17,7 @@ public class DataSet extends NetworkJSONObject {
     public Date Created;
     public String Name;
     public String Description;
+    public Photo MapPhoto;
     public List<MapPosition> Locations;
 
     public DataSet(String name, String description) {
@@ -24,6 +25,7 @@ public class DataSet extends NetworkJSONObject {
         Created = new Date();
         Name = name;
         Description = description;
+        MapPhoto = null;
         Locations = new LinkedList<>();
     }
 
@@ -51,5 +53,11 @@ public class DataSet extends NetworkJSONObject {
         Created = parseJSONDate(json.getString("created"));
         Name = json.getString("name");
         Description = json.getString("description");
+
+        JSONObject jsonPhoto = json.optJSONObject("mapPhoto");
+        if (jsonPhoto != null) {
+            MapPhoto = new Photo();
+            MapPhoto.parseJSON(jsonPhoto);
+        }
     }
 }

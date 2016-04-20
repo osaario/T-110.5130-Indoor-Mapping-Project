@@ -68,8 +68,14 @@ public class Photo extends NetworkJSONObject {
         YR = json.getDouble("yRotation");
         ZR = json.getDouble("zRotation");
         Description = json.getString("description");
-        URL = json.getString("image") + "/small";
-        ThumbURL = json.getString("image") + "/tiny";
+        String url = json.optString("image");
+        if (url != null) {
+            URL = url + "/small";
+            ThumbURL = url + "/tiny";
+        } else {
+            URL = null;
+            ThumbURL = null;
+        }
     }
 
     public File createFilePath() {

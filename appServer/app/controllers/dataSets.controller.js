@@ -11,11 +11,20 @@ var mongoose = require('mongoose'),
 var extend = require('util')._extend;
 
 exports.list = function(req, res, next) {
-	DataSet.find().exec(G.onSuccess(next, res));
+	DataSet.find().populate('mapPhoto').exec(G.onSuccess(next, res));
 };
 
 exports.create = function(req, res, next) {
-	DataSet.create(req.body, G.onSuccess(next, res));
+	Photo.create({}, G.onSuccess(next, function(photo) {
+		var doc = extend({}, req.body);
+		doc.mapPhoto = photo._id;
+		DataSet.create(doc, G.onSuccess(next, function(dataSet) {
+			photo.datasetId = dataSet._id;
+			photo.save(G.onSuccess(next, function(doc) {
+				res.json(dataSet);
+			}));
+		}));
+	}));
 };
 
 exports.update = function(req, res, next) {
@@ -27,17 +36,11 @@ exports.update = function(req, res, next) {
 };
 
 exports.delete = function(req, res, next) {
-	PhotoLocation.find({dataSet:req.params.datasetId}).exec(G.onSuccess(next, function(locations) {
-		G.foreach(locations, function(i, nextFor) {
-			Photo.remove({location:locations[i]}, function(err, doc) {
-				nextFor();
-			});
-		}, function() {
-			PhotoLocation.remove({dataSet:req.params.datasetId}, function(err, doc) {
-				DataSet.findByIdAndRemove(req.params.datasetId, G.onSuccess(next, res));
-			});
+	Photo.remove({dataSet:req.params.datasetId}, function(err, n) {
+		PhotoLocation.remove({dataSet:req.params.datasetId}, function(err, n) {
+			DataSet.findByIdAndRemove(req.params.datasetId, G.onSuccess(next, res));
 		});
-	}));
+	});
 };
 
 exports.listLocations = function(req, res, next) {
@@ -83,6 +86,7 @@ exports.createPhoto = function(req, res, next) {
 		PhotoLocation.findById(req.params.locationId, G.onSuccess(next, function(location) {
 			var doc = extend({}, req.body);
 			doc.location = location._id;
+			doc.dataSet = dataSet._id;
 			Photo.create(doc, G.onSuccess(next, function(photo) {
 				location.photos.push(photo._id);
 				location.save(G.onSuccess(next, function(doc) {

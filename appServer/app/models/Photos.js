@@ -13,11 +13,16 @@ var PhotoSchema = new Schema({
 	description: {type:String, default:''},
 	image: {data:Buffer, contentType:String, select:false},
 	location: {type:Schema.ObjectId, ref:'Location'},
+	dataSet: {type:Schema.ObjectId, ref:'DataSet'},
 });
 
 PhotoSchema.set('toJSON', {
 	transform: function(doc, ret, options) {
-		ret.image = config.url + 'api/images/' + ret._id;
+		if (doc.image.data !== undefined) {
+			ret.image = config.url + 'api/images/' + ret._id;
+		} else {
+			delete ret.image;
+		}
 		return ret;
 	}
 });
