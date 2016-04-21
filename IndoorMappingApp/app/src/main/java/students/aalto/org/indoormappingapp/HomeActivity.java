@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -22,7 +23,7 @@ import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
 public class HomeActivity extends MenuRouterActivity {
-
+    boolean editMode = false;
     ProgressBar progress;
     List<DataSet> loadedDataset;
 
@@ -42,10 +43,28 @@ public class HomeActivity extends MenuRouterActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 Intent intent = new Intent(getApplicationContext(), DataSetActivity.class);
                 startActivity(intent);
             }
         });
+
+        Button button= (Button) findViewById(R.id.buttonEdit);
+        //edit button
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                editMode = !editMode;
+                if (editMode){
+                    setTitle("Select building to modify!");
+                } else{
+                    setTitle("Indoor Mapping!");
+                }
+            }
+        });
+
+
     }
 
     @Override
@@ -69,10 +88,20 @@ public class HomeActivity extends MenuRouterActivity {
                 // Floor activity disabled temporarily
                 //Intent intent = new Intent(getBaseContext(), FloorActivity.class);
                 ApplicationState.Instance().setSelectedDataSet(loadedDataset.get(position));
-                Intent intent = new Intent(getBaseContext(), LocationListActivity.class);
-                intent.putExtra("building", buildingName);
-                intent.putExtra("ID", buildingID);
-                startActivity(intent);
+                if (!editMode) {
+                    //normal mode
+                    Intent intent = new Intent(getBaseContext(), LocationListActivity.class);
+                    intent.putExtra("building", buildingName);
+                    intent.putExtra("ID", buildingID);
+                    startActivity(intent);
+                } else{
+                    //edit mode
+                    Intent intent = new Intent(getBaseContext(), EditBuildingActivity.class);
+                    intent.putExtra("building", buildingName);
+                    intent.putExtra("ID", buildingID);
+                    startActivity(intent);
+                }
+
             }
         });
     }
@@ -109,7 +138,5 @@ public class HomeActivity extends MenuRouterActivity {
                 progress.setVisibility(View.GONE);
             }
         });
-
     }
-
 }
