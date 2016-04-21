@@ -123,15 +123,20 @@ exports.getImage = function(req, res, next) {
 };
 
 exports.getImageScaled = function(req, res, next) {
-	var size = req.params.size == 'tiny' ? [200,200] : [1080,1920];
 	Photo.findById(req.params.photoId).exec(G.onSuccess(next, function(photo) {
 		if (photo.image.data !== undefined) {
 			lwip.open(photo.image.data, 'jpg', G.onSuccess(next, function(image) {
-				image.contain(size[0], size[1], G.onSuccess(next, function(image) {
+				var cb = G.onSuccess(next, function(image) {
 					image.toBuffer('jpg', G.onSuccess(next, function(buffer) {
 						res.contentType('image/jpeg').send(buffer);
-					}));
-				}));
+					}))
+				});
+				if (req.params.size == 'tiny') {
+					image.cover(200, 200, cb);
+				} else {
+					var ratio = Math.min(1, 1920 / image.width(), 1920 / image.height());
+					image.scale(ratio, cb);
+				}
 			}));
 		} else {
 			res.status(404).json({'error':'Missing image'});
