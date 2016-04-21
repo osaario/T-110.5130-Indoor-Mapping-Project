@@ -39,12 +39,33 @@ public class EditBuildingActivity extends AppCompatActivity {
         buildingNameTextView.setText(building);
 
         final Button deleteButton = (Button) findViewById(R.id.button_dataset_remove);
-
         deleteButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 NetworkService.removeDataset(id);
+                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
+
+
+        final Button updateButton = (Button) findViewById(R.id.button_buildingUpdate);
+        updateButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                //Textview_buildingID
+                EditText buildingNameEdit = (EditText)findViewById(R.id.editText_buildingName);
+                EditText buildingDescEdit = (EditText)findViewById(R.id.editText_buildingDesc);
+                final String newDatasetName = buildingNameEdit.getText().toString();
+                final String newDatasetDesc = buildingDescEdit.getText().toString();
+                DataSet datasetnew = new DataSet(newDatasetName,newDatasetDesc);
+                datasetnew.ID = id;
+                NetworkService.saveDataSet(datasetnew);
                 Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(intent);
             }
