@@ -35,6 +35,7 @@ import rx.functions.Func3;
 import students.aalto.org.indoormappingapp.model.MapPosition;
 import students.aalto.org.indoormappingapp.model.RenderData;
 import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
+import students.aalto.org.indoormappingapp.sensors.SensorsSnapshot;
 
 public class MainActivity extends MenuRouterActivity {
 
@@ -157,33 +158,33 @@ public class MainActivity extends MenuRouterActivity {
 
                     */
 
-        sensors.stepWithDirectionObservable.doOnNext(new Action1<Integer>() {
+        sensors.stepObservable.doOnNext(new Action1<SensorsSnapshot>() {
             @Override
-            public void call(Integer integer) {
+            public void call(SensorsSnapshot sensors) {
                 stopText.setVisibility(View.VISIBLE);
                 okText.setVisibility(View.INVISIBLE);
             }
-        }).debounce(5, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Integer>() {
+        }).debounce(5, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<SensorsSnapshot>() {
             @Override
-            public void call(Integer integer) {
+            public void call(SensorsSnapshot sensors) {
                 stopText.setVisibility(View.INVISIBLE);
                 okText.setVisibility(View.VISIBLE);
             }
         });
         rx.Observable<MapPosition> direction =
-                sensors.stepWithDirectionObservable.map(new Func1<Integer, MapPosition>() {
+                sensors.stepObservable.map(new Func1<SensorsSnapshot, MapPosition>() {
                     @Override
-                    public MapPosition call(Integer azimuth) {
-                        double x = Math.cos((double) azimuth * 0.0174532925) * 10;
-                        double y = Math.sin((double) azimuth * 0.0174532925) * 10;
+                    public MapPosition call(SensorsSnapshot sensors) {
+                        double x = Math.cos((double) sensors.Azimut * 0.0174532925) * 10;
+                        double y = Math.sin((double) sensors.Azimut * 0.0174532925) * 10;
                         int xx = (int) x;
                         int yy = (int) y;
                         Log.d("x", x + "");
                         Log.d("y", y + "");
-                        Log.d("azimuth", azimuth + "");
+                        Log.d("azimuth", sensors.Azimut + "");
                         xTextView.setText("x" + x);
                         yTextView.setText("y" + y);
-                        azTextView.setText("az" + azimuth);
+                        azTextView.setText("az" + sensors.Azimut);
 
                         return new MapPosition(xx, yy, 0);
                     }
