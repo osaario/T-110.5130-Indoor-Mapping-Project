@@ -23,4 +23,5 @@
     <string name="error_connection">Network connection failed</string>
     <string name="title_activity_photo_list">Photos</string>
     <string name="title_activity_camera">CameraActivity</string>
+    <string name="title_activity_edit_building">EditBuildingActivity</string>
 </resources>

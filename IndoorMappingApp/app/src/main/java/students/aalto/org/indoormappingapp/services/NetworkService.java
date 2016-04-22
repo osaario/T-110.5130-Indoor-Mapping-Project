@@ -43,6 +43,15 @@ public class NetworkService {
         return postOrPut("datasets", dataSet, false);
     }
 
+    //edited by Mehrad
+    public static Observable<Location> removeDataset(String dataSetID) {
+        if (dataSetID != null) {
+            return remove("datasets/" + dataSetID);
+        }
+        return remove("datasets/" + dataSetID);
+    }
+
+
     public static Observable<List<Location>> getLocations(String dataSetID) {
         return get("datasets/" + dataSetID + "/locations", new Location());
     }
@@ -84,6 +93,17 @@ public class NetworkService {
 
     private static <T extends NetworkObject> Observable<T> postOrPut(String path, T data, Boolean updateFlag) {
         return requestService(path, updateFlag ? Method.PUT : Method.POST, data).map(new Func1<List<T>, T>() {
+            @Override
+            public T call(List<T> ts) {
+                return ts.get(0);
+            }
+        });
+    }
+
+    //edited by Mehrad
+    private static <T extends NetworkObject> Observable<T> remove(String path) {
+        T data = null;
+        return requestService(path, Method.DELETE, data).map(new Func1<List<T>, T>() {
             @Override
             public T call(List<T> ts) {
                 return ts.get(0);
