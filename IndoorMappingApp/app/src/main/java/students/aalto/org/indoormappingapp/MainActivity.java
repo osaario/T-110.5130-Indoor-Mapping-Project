@@ -1,5 +1,6 @@
 package students.aalto.org.indoormappingapp;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -67,18 +68,24 @@ public class MainActivity extends MenuRouterActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setIndeterminate(true);
+        dialog.setMessage(getString(R.string.loading));
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DataSet dataSet = ApplicationState.Instance().getSelectedDataSet();
-        final Location location = ApplicationState.Instance().getSelectedLocation();
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
 
         final Button leftButton = (Button) findViewById(R.id.button_left);
         final Button rightButton = (Button) findViewById(R.id.button_right);
         final Button photoButton = (Button) findViewById(R.id.button_photo);
+
+        if(ApplicationState.Instance().getSelectedLocation() == null) {
+            photoButton.setVisibility(View.GONE);
+        }
 
         Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
@@ -199,6 +206,7 @@ public class MainActivity extends MenuRouterActivity {
             }
         }).startWith(new TransitionAndZoom(0f,0f,1f));
 
+        dialog.show();
         Observable.combineLatest(NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID).map(new Func1<List<Location>, List<Location>>() {
             @Override
             public List<Location> call(List<Location> locations) {
@@ -210,7 +218,7 @@ public class MainActivity extends MenuRouterActivity {
                     }
 
                 }
-                return locations;
+                return filtered;
             }
         }), transitionAndZoomObservable, new Func2<List<Location>, TransitionAndZoom, Pair<List<Location>, TransitionAndZoom>>() {
             @Override
@@ -221,6 +229,7 @@ public class MainActivity extends MenuRouterActivity {
             @Override
             public void call(Pair<List<Location>, TransitionAndZoom> listTransitionAndZoomPair) {
                 if (mSurfaceHolder == null) return;
+                dialog.dismiss();
 
                 List<Location> photos = listTransitionAndZoomPair.first;
                 Canvas canvas = mSurfaceHolder.lockCanvas();

@@ -60,6 +60,11 @@ public class LocationListActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ApplicationState.Instance().setSelectedLocation(null);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
