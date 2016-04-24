@@ -46,6 +46,7 @@ import students.aalto.org.indoormappingapp.model.RenderData;
 import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 import students.aalto.org.indoormappingapp.sensors.SensorsSnapshot;
 import students.aalto.org.indoormappingapp.services.NetworkService;
+import students.aalto.org.indoormappingapp.tests.SensorsTestActivity;
 
 class TransitionAndZoom {
     public TransitionAndZoom(float x,float y,float zoom) {
@@ -72,11 +73,15 @@ public class MainActivity extends MenuRouterActivity {
 
         final ProgressDialog dialog = new ProgressDialog(this);
         dialog.setIndeterminate(true);
+        dialog.setCancelable(false);
         dialog.setMessage(getString(R.string.loading));
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+        getSupportActionBar().setTitle(ApplicationState.Instance().getSelectedDataSet().Name);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
 
@@ -380,6 +385,26 @@ public class MainActivity extends MenuRouterActivity {
         */
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_empty, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        //noinspection SimplifiableIfStatement
+        if (id == android.R.id.home) {
+            MainActivity.this.finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onResume() {
