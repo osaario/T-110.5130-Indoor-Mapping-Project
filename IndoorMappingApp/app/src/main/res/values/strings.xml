@@ -31,4 +31,5 @@
     <string name="action_pin_to_map">Pin to map</string>
     <string name="place_under_cursor">Place under cursor</string>
     <string name="loading">Loading</string>
+    <string name="edit_location">Edit location under cursor</string>
 </resources>

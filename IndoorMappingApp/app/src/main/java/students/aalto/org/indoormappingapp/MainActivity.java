@@ -63,6 +63,7 @@ public class MainActivity extends MenuRouterActivity {
     SurfaceHolder mSurfaceHolder;
     private Float translationX = 0f;
     private Float translationY = 0f;
+    private List<Location> photos;
 
 
     @Override
@@ -82,10 +83,29 @@ public class MainActivity extends MenuRouterActivity {
         final Button leftButton = (Button) findViewById(R.id.button_left);
         final Button rightButton = (Button) findViewById(R.id.button_right);
         final Button photoButton = (Button) findViewById(R.id.button_photo);
+        final Button showLocationButton = (Button) findViewById(R.id.button_show_location);
 
         if(ApplicationState.Instance().getSelectedLocation() == null) {
             photoButton.setVisibility(View.GONE);
+            showLocationButton.setVisibility(View.VISIBLE);
+        } else {
+            photoButton.setVisibility(View.VISIBLE);
+            showLocationButton.setVisibility(View.GONE);
         }
+
+        showLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               for(Location loc : photos) {
+                   if(loc.X > translationX - 10 && loc.X < translationX + 10 && loc.Y > translationY - 10 && loc.Y < translationY + 10) {
+                       Intent intent = new Intent(MainActivity.this, PhotoListActivity.class);
+                       ApplicationState.Instance().setSelectedLocation(loc);
+                       startActivity(intent);
+                   }
+               }
+
+            }
+        });
 
         Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
@@ -231,7 +251,7 @@ public class MainActivity extends MenuRouterActivity {
                 if (mSurfaceHolder == null) return;
                 dialog.dismiss();
 
-                List<Location> photos = listTransitionAndZoomPair.first;
+                photos = listTransitionAndZoomPair.first;
                 Canvas canvas = mSurfaceHolder.lockCanvas();
                 if (canvas == null) return;
                 canvas.drawColor(Color.WHITE);
