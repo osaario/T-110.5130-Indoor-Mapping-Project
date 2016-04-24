@@ -12,22 +12,22 @@
     tools:context="students.aalto.org.indoormappingapp.EditBuildingActivity"
     tools:showIn="@layout/activity_edit_building">
 
-    <TextView
+    <!--TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Default building"
         android:id="@+id/Textview_buildingName"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true" /-->
 
-    <TextView
+    <!--TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Default ID"
         android:id="@+id/Textview_buildingID"
         android:layout_below="@+id/Textview_buildingName"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true" /-->
 
     <Button
         android:layout_width="wrap_content"
@@ -41,7 +41,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText_buildingName"
-        android:layout_below="@+id/Textview_buildingID"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
@@ -67,6 +66,21 @@
         android:text="Update"
         android:id="@+id/button_buildingUpdate"
         android:layout_below="@+id/editText_buildingDesc"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/select_map_photo"
+        android:id="@+id/button_capturePhoto"
+        android:layout_below="@+id/button_buildingUpdate"
+        android:layout_centerHorizontal="true" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

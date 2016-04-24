@@ -199,7 +199,7 @@ exports.uploadImage = function(req, res, next) {
 };
 
 exports.details = function(req, res, next) {
-	DataSet.findById(req.params.datasetId, G.onSuccess(next, function(dataset) {
+	DataSet.findOne({_id:req.params.datasetId}).populate('mapPhoto').exec(G.onSuccess(next, function(dataset) {
 		var out = dataset.toJSON();
 		PhotoLocation.find({dataSet:dataset._id}).populate('photos paths').exec(G.onSuccess(next, function(locations) {
 			out.locations = locations;
