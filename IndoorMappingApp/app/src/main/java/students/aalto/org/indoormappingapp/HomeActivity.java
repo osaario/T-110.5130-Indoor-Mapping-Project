@@ -1,5 +1,6 @@
 package students.aalto.org.indoormappingapp;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Subscription;
 import rx.functions.Action1;
 import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.DataSet;
@@ -30,8 +32,9 @@ import students.aalto.org.indoormappingapp.tests.SensorsTestActivity;
 
 public class HomeActivity extends AppCompatActivity {
     boolean editMode = false;
-    ProgressBar progress;
     List<DataSet> loadedDataset;
+    private ProgressDialog dialog;
+    private Subscription subscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +44,10 @@ public class HomeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
-        progress = (ProgressBar) findViewById(R.id.progressBar);
-        progress.setVisibility(View.GONE);
+        dialog = new ProgressDialog(this);
+        dialog.setIndeterminate(true);
+        dialog.setCancelable(false);
+        dialog.setMessage(getString(R.string.loading));
 
         addListenerOnListView();
 
@@ -99,12 +104,43 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        subscription.unsubscribe();
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        addItemsToListView();
+        dialog.show();
+        subscription = NetworkService.getDataSets().subscribe(new Action1<List<DataSet>>() {
+
+            @Override
+            public void call(List<DataSet> dataSets) {
+                dialog.dismiss();
+                loadedDataset = dataSets;
+                ArrayList<String> items = new ArrayList<String>();
+
+                for (DataSet ds : dataSets) {
+                    items.add(ds.Name);
+                }
+
+                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(HomeActivity.this, R.layout.listitem, items);
+                ListView listView = (ListView) findViewById(R.id.listView_home);
+                listView.setAdapter(adapter);
+
+
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                dialog.dismiss();
+                Log.e("location", throwable.toString());
+                Toast.makeText(HomeActivity.this, getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
+
+            }
+        });
     }
 
     public void addListenerOnListView() {
@@ -141,36 +177,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void addItemsToListView() {
-        progress.setVisibility(View.VISIBLE);
 
         final Context context = this;
 
-        NetworkService.getDataSets().subscribe(new Action1<List<DataSet>>() {
-
-            @Override
-            public void call(List<DataSet> dataSets) {
-                loadedDataset = dataSets;
-                ArrayList<String> items = new ArrayList<String>();
-
-                for (DataSet ds : dataSets) {
-                    items.add(ds.Name);
-                }
-
-                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, R.layout.listitem, items);
-                ListView listView = (ListView) findViewById(R.id.listView_home);
-                listView.setAdapter(adapter);
-
-                progress.setVisibility(View.GONE);
-
-            }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                Log.e("location", throwable.toString());
-                Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
-
-                progress.setVisibility(View.GONE);
-            }
-        });
     }
 }

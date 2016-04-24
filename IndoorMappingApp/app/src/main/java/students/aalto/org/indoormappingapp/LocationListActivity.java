@@ -1,5 +1,6 @@
 package students.aalto.org.indoormappingapp;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -94,7 +95,10 @@ public class LocationListActivity extends AppCompatActivity {
         });
 
         ListView locationListView = (ListView) findViewById(R.id.location_list_view);
-        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.location_list_progress);
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setIndeterminate(true);
+        dialog.setCancelable(false);
+        dialog.setMessage(getString(R.string.loading));
 
         listAdapter = new LocationListAdapter(this, 0);
 
@@ -110,12 +114,12 @@ public class LocationListActivity extends AppCompatActivity {
             }
         });
 
-        progressBar.setVisibility(View.VISIBLE);
+        dialog.show();
         loadSubscription = NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID)
                 .subscribe(new Action1<List<Location>>() {
                     @Override
                     public void call(List<Location> locations) {
-                        progressBar.setVisibility(View.GONE);
+                        dialog.hide();
                         listAdapter.clear();
                         listAdapter.addAll(locations);
                     }

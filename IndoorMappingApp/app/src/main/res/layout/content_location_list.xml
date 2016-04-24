@@ -11,11 +11,4 @@
         android:layout_width="match_parent"
         android:id="@+id/location_list_view"
         android:layout_height="match_parent"></ListView>
-
-    <ProgressBar
-        android:layout_width="match_parent"
-        android:id="@+id/location_list_progress"
-        android:indeterminate="true"
-        android:layout_height="match_parent" />
-
 </FrameLayout>
