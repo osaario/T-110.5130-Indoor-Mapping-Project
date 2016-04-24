@@ -1,5 +1,8 @@
 package students.aalto.org.indoormappingapp.model;
 
+import android.os.Debug;
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,8 +67,13 @@ public class Location extends NetworkJSONObject {
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 Photo p = new Photo();
-                p.parseJSON(jsonArray.getJSONObject(i));
-                Photos.add(p);
+                try {
+                    p.parseJSON(jsonArray.getJSONObject(i));
+                } catch (JSONException e) {
+                    Log.d("error", "photoparse");
+                } finally {
+                    Photos.add(p);
+                }
             }
         }
 

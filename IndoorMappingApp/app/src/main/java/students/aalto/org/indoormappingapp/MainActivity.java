@@ -60,6 +60,8 @@ class TransitionAndZoom {
 public class MainActivity extends MenuRouterActivity {
 
     SurfaceHolder mSurfaceHolder;
+    private Float translationX = 0f;
+    private Float translationY = 0f;
 
 
     @Override
@@ -70,14 +72,38 @@ public class MainActivity extends MenuRouterActivity {
         setSupportActionBar(toolbar);
 
         DataSet dataSet = ApplicationState.Instance().getSelectedDataSet();
-        Location location = ApplicationState.Instance().getSelectedLocation();
+        final Location location = ApplicationState.Instance().getSelectedLocation();
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
 
         final Button leftButton = (Button) findViewById(R.id.button_left);
-        final Button stepButton = (Button) findViewById(R.id.button_step);
         final Button rightButton = (Button) findViewById(R.id.button_right);
         final Button photoButton = (Button) findViewById(R.id.button_photo);
+
+        Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(final Subscriber<? super Integer> subscriber) {
+                photoButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        subscriber.onNext(0);
+                    }
+                });
+            }
+        }).switchMap(new Func1<Integer, Observable<?>>() {
+            @Override
+            public Observable<?> call(Integer integer) {
+                Location loc = ApplicationState.Instance().getSelectedLocation();
+                loc.X = translationX.intValue();
+                loc.Y = translationY.intValue();
+                return NetworkService.saveLocation(ApplicationState.Instance().getSelectedDataSet().ID, loc);
+            }
+        }).subscribe(new Action1<Object>() {
+            @Override
+            public void call(Object o) {
+                MainActivity.this.finish();
+            }
+        });
 
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -173,7 +199,20 @@ public class MainActivity extends MenuRouterActivity {
             }
         }).startWith(new TransitionAndZoom(0f,0f,1f));
 
-        Observable.combineLatest(NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID), transitionAndZoomObservable, new Func2<List<Location>, TransitionAndZoom, Pair<List<Location>, TransitionAndZoom>>() {
+        Observable.combineLatest(NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID).map(new Func1<List<Location>, List<Location>>() {
+            @Override
+            public List<Location> call(List<Location> locations) {
+                if(ApplicationState.Instance().getSelectedLocation() == null) return locations;
+                ArrayList<Location> filtered = new ArrayList<Location>();
+                for(Location loc : locations) {
+                    if(!loc.ID.equals(ApplicationState.Instance().getSelectedLocation().ID)) {
+                        filtered.add(loc);
+                    }
+
+                }
+                return locations;
+            }
+        }), transitionAndZoomObservable, new Func2<List<Location>, TransitionAndZoom, Pair<List<Location>, TransitionAndZoom>>() {
             @Override
             public Pair<List<Location>, TransitionAndZoom> call(List<Location> locations, TransitionAndZoom transitionAndZoom) {
                 return new Pair<List<Location>, TransitionAndZoom>(locations, transitionAndZoom);
@@ -198,8 +237,8 @@ public class MainActivity extends MenuRouterActivity {
 
                 float scaleX = listTransitionAndZoomPair.second.Zoom;
                 float scaleY = listTransitionAndZoomPair.second.Zoom;
-                float translationX = listTransitionAndZoomPair.second.X;
-                float translationY = listTransitionAndZoomPair.second.Y;
+                translationX = listTransitionAndZoomPair.second.X;
+                translationY = listTransitionAndZoomPair.second.Y;
 
                 canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
                         ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
@@ -215,8 +254,8 @@ public class MainActivity extends MenuRouterActivity {
                 paint.setColor(Color.GRAY);
                 paint.setStrokeWidth(2);
 
-                canvas.drawLine(centerX - 20f,  centerY, centerX + 20f, centerY, paint);
-                canvas.drawLine(centerX,centerY - 20f, centerX, centerY + 20f, paint);
+                canvas.drawLine(centerX - 20f, centerY, centerX + 20f, centerY, paint);
+                canvas.drawLine(centerX, centerY - 20f, centerX, centerY + 20f, paint);
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
 
 
