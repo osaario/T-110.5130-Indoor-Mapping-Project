@@ -57,6 +57,7 @@ public class PhotoListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_photo_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(ApplicationState.Instance().getSelectedLocation().Name);
 
         ActionBar bar = getSupportActionBar();
         if (bar != null) {
