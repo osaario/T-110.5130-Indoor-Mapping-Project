@@ -122,6 +122,8 @@ public class MainActivity extends MenuRouterActivity {
                 photoButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        dialog.setMessage(getString(R.string.sending));
+                        dialog.show();
                         subscriber.onNext(0);
                     }
                 });
@@ -137,7 +139,14 @@ public class MainActivity extends MenuRouterActivity {
         }).subscribe(new Action1<Object>() {
             @Override
             public void call(Object o) {
+                dialog.dismiss();
                 MainActivity.this.finish();
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                dialog.dismiss();
+                Toast.makeText(MainActivity.this, R.string.network_error, Toast.LENGTH_LONG);
             }
         });
 

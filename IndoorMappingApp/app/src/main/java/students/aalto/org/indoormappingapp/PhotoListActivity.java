@@ -1,5 +1,6 @@
 package students.aalto.org.indoormappingapp;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -49,6 +50,7 @@ public class PhotoListActivity extends AppCompatActivity {
     FloatingActionButton button;
     PhotoListAdapter adapter;
     private Subscription subscription;
+    private ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,10 +79,6 @@ public class PhotoListActivity extends AppCompatActivity {
         locationId = ApplicationState.Instance().getSelectedLocation().ID;
 
 
-
-        progress = (ProgressBar) findViewById(R.id.progressBar);
-        progress.setVisibility(View.VISIBLE);
-
         button = (FloatingActionButton) findViewById(R.id.fab);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,14 +91,26 @@ public class PhotoListActivity extends AppCompatActivity {
         ListView list = (ListView) findViewById(R.id.listView_photoList);
         list.setAdapter(adapter);
 
-        final Context context = this;
+        dialog = new ProgressDialog(this);
+        dialog.setIndeterminate(true);
+        dialog.setCancelable(false);
+        dialog.setMessage(getString(R.string.loading));
+
+        dialog.show();
         subscription = NetworkService.getPhotos(datasetId, locationId).subscribe(new Action1<List<Photo>>() {
 
             @Override
             public void call(List<Photo> photos) {
                 adapter.clear();
+                dialog.dismiss();
                 adapter.addAll(photos);
-                progress.setVisibility(View.GONE);
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                dialog.dismiss();
+                Toast.makeText(PhotoListActivity.this, getString(R.string.network_error), Toast.LENGTH_LONG).show();
+
             }
         });
     }
@@ -147,10 +157,11 @@ public class PhotoListActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            progress.setVisibility(View.VISIBLE);
             button.setEnabled(false);
 
+            dialog.setMessage(getString(R.string.sending));
             final Context context = this;
+            dialog.show();
             NetworkService.savePhoto(datasetId, locationId, capturedPhoto).switchMap(new Func1<Photo, Observable<ImageUpload>>() {
                 @Override
                 public Observable<ImageUpload> call(Photo photo) {
@@ -159,16 +170,16 @@ public class PhotoListActivity extends AppCompatActivity {
             }).subscribe(new Action1<ImageUpload>() {
                 @Override
                 public void call(ImageUpload imageUpload) {
+                    dialog.dismiss();
                     adapter.add(capturedPhoto);
-                    progress.setVisibility(View.GONE);
                     button.setEnabled(true);
                 }
             }, new Action1<Throwable>() {
                 @Override
                 public void call(Throwable throwable) {
+                    dialog.dismiss();
                     Log.e("photos", throwable.toString());
                     Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
-                    progress.setVisibility(View.GONE);
                     button.setEnabled(true);
                 }
             });
