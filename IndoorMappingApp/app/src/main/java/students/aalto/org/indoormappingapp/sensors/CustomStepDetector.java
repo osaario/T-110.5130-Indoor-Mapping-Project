@@ -25,18 +25,17 @@ public class CustomStepDetector {
 
         // Detect valleys.
         if (a1 > a2 && a2 < a3) {
-            Log.d("step", "valley " + timestamp);
             valleyA = a2;
         }
 
         // Detect peaks.
         if (a1 < a2 && a2 > a3) {
-            Log.d("step", "peak " + timestamp + " t=" + (peakTime - lastPeakTime) + " d=" + (peakA - valleyA));
             peakA = a2;
             peakTime = timestamp;
 
             // Detect steps.
             if (lastPeakTime != 0 && valleyA != 0 && peakTime - lastPeakTime > MIN_STEP_TIME && Math.abs(peakA - valleyA) > MIN_STEP_ACC) {
+                Log.d("step", "stepped t=" + (peakTime - lastPeakTime) + " d=" + (peakA - valleyA));
                 steps += 1;
                 lastPeakTime = peakTime;
                 return true;

@@ -13,6 +13,7 @@ var LocationSchema = new Schema({
 	dataSet: {type:Schema.ObjectId, ref:'DataSet'},
 	previousLocation: {type:Schema.ObjectId, ref:'Location', default:null},
 	photos: [{type:Schema.ObjectId, ref:'Photo'}],
+	paths: [{type:Schema.ObjectId, ref:'Path'}],
 });
 
 mongoose.model('Location', LocationSchema);

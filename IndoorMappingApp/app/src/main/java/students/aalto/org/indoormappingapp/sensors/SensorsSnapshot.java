@@ -9,11 +9,11 @@ public class SensorsSnapshot {
     public float[] Gyroscope;
     public float[] Magnetic;
     public float[] Accelerometer;
-    public float[] Coordinates;
+    public float[] Coordinate;
 
     public static SensorsSnapshot initial(float[] coordinates) {
         SensorsSnapshot sensors = new SensorsSnapshot();
-        sensors.Coordinates = coordinates;
+        sensors.Coordinate = coordinates;
         return sensors;
     }
 
@@ -23,7 +23,7 @@ public class SensorsSnapshot {
         Gyroscope = null;
         Magnetic = null;
         Accelerometer = null;
-        Coordinates = null;
+        Coordinate = null;
     }
 
     public SensorsSnapshot(long timestamp, float[] orientation) {
@@ -32,7 +32,7 @@ public class SensorsSnapshot {
         Gyroscope = null;
         Magnetic = null;
         Accelerometer = null;
-        Coordinates = null;
+        Coordinate = null;
     }
 
     public float azimuth() {

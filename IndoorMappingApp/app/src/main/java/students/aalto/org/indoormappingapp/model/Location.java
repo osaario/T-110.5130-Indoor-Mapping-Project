@@ -18,6 +18,7 @@ public class Location extends NetworkJSONObject {
     public Integer Z;
     public String Name;
     public List<Photo> Photos;
+    public List<Path> Paths;
 
     public Location(Integer x, Integer y, Integer z, String name) {
         ID = null;
@@ -27,6 +28,7 @@ public class Location extends NetworkJSONObject {
         Z = z;
         Name = name;
         Photos = new ArrayList<Photo>();
+        Paths = new ArrayList<Path>();
     }
 
     public Location() {
@@ -58,12 +60,7 @@ public class Location extends NetworkJSONObject {
         Z = json.getInt("zCoordinate");
         Name = json.getString("name");
 
-        JSONArray jsonArray;
-        try {
-            jsonArray = json.getJSONArray("photos");
-        } catch (JSONException e) {
-            jsonArray = null;
-        }
+        JSONArray jsonArray = json.optJSONArray("photos");
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 Photo p = new Photo();
@@ -71,5 +68,15 @@ public class Location extends NetworkJSONObject {
                 Photos.add(p);
             }
         }
+
+        jsonArray = json.optJSONArray("paths");
+        if (jsonArray != null) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                Path p = new Path();
+                p.parseJSON(jsonArray.getJSONObject(i));
+                Paths.add(p);
+            }
+        }
     }
+
 }

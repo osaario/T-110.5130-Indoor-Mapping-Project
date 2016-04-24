@@ -8,9 +8,10 @@ module.exports = function() {
 
 	var db = mongoose.connect(config.db);
 
-	require('../app/models/Photos');
-	require('../app/models/Locations');
 	require('../app/models/DataSets');
+	require('../app/models/Locations');
+	require('../app/models/Photos');
+	require('../app/models/Paths');
 
 	return db;
 };

@@ -2,17 +2,12 @@ package students.aalto.org.indoormappingapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.IOException;
 
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.services.NetworkService;
@@ -43,7 +38,7 @@ public class EditBuildingActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                NetworkService.removeDataset(id);
+                NetworkService.removeDataSet(id);
                 Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                 startActivity(intent);
             }

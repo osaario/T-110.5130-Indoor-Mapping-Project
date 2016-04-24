@@ -20,6 +20,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
+import students.aalto.org.indoormappingapp.model.Path;
 import students.aalto.org.indoormappingapp.model.Photo;
 
 /**
@@ -30,7 +31,8 @@ public class NetworkService {
 
     final static String SERVICE_URL = "https://indoor-mapping-app-server.herokuapp.com/api/";
     final static int SERVICE_POOL_SIZE = 3;
-    enum Method { GET, POST, PUT, DELETE };
+
+    enum Method {GET, POST, PUT, DELETE};
 
     public static Observable<List<DataSet>> getDataSets() {
         return get("datasets", new DataSet());
@@ -43,14 +45,9 @@ public class NetworkService {
         return postOrPut("datasets", dataSet, false);
     }
 
-    //edited by Mehrad
-    public static Observable<Location> removeDataset(String dataSetID) {
-        if (dataSetID != null) {
-            return remove("datasets/" + dataSetID);
-        }
-        return remove("datasets/" + dataSetID);
+    public static Observable<Boolean> removeDataSet(String dataSetID) {
+        return delete("datasets/" + dataSetID);
     }
-
 
     public static Observable<List<Location>> getLocations(String dataSetID) {
         return get("datasets/" + dataSetID + "/locations", new Location());
@@ -63,6 +60,21 @@ public class NetworkService {
         return postOrPut("datasets/" + dataSetID + "/locations", location, false);
     }
 
+    public static Observable<Boolean> removeLocation(String dataSetID, String locationID) {
+        return delete("datasets/" + dataSetID + "/locations/" + locationID);
+    }
+
+    public static Observable<Path> savePath(String dataSetID, Path path) {
+        if (path.ID != null) {
+            return postOrPut("datasets/" + dataSetID + "/paths/" + path.ID, path, true);
+        }
+        return postOrPut("datasets/" + dataSetID + "/paths", path, false);
+    }
+
+    public static Observable<Boolean> removePath(String dataSetID, String pathID) {
+        return delete("datasets/" + dataSetID + "/paths/" + pathID);
+    }
+
     public static Observable<List<Photo>> getPhotos(String dataSetID, String locationID) {
         return get("datasets/" + dataSetID + "/locations/" + locationID + "/photos", new Photo());
     }
@@ -72,6 +84,10 @@ public class NetworkService {
             return postOrPut("datasets/" + dataSetID + "/locations/" + locationID + "/photos/" + photo.ID, photo, true);
         }
         return postOrPut("datasets/" + dataSetID + "/locations/" + locationID + "/photos", photo, false);
+    }
+
+    public static Observable<Boolean> removePhoto(String dataSetID, String locationID, Photo photo) {
+        return delete("datasets/" + dataSetID + "/locations/" + locationID + "/photos/" + photo.ID);
     }
 
     public static Observable<ImageDownload> getImage(Photo photo) {
@@ -100,13 +116,11 @@ public class NetworkService {
         });
     }
 
-    //edited by Mehrad
-    private static <T extends NetworkObject> Observable<T> remove(String path) {
-        T data = null;
-        return requestService(path, Method.DELETE, data).map(new Func1<List<T>, T>() {
+    private static Observable<Boolean> delete(String path) {
+        return requestService(path, Method.DELETE, new OKResponse()).map(new Func1<List<OKResponse>, Boolean>() {
             @Override
-            public T call(List<T> ts) {
-                return ts.get(0);
+            public Boolean call(List<OKResponse> ts) {
+                return ts.get(0).success;
             }
         });
     }
@@ -141,7 +155,7 @@ public class NetworkService {
                 // Parse response.
                 NetworkObject objects[] = data.parseResponse(response);
                 List<T> result = new ArrayList<T>(objects.length);
-                for (NetworkObject o: objects) {
+                for (NetworkObject o : objects) {
                     result.add((T) o);
                 }
                 return result;

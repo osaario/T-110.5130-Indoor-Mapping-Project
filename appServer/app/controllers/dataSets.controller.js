@@ -5,6 +5,7 @@ var mongoose = require('mongoose'),
 	DataSet = mongoose.model('DataSet'),
 	PhotoLocation = mongoose.model('Location'),
 	Photo = mongoose.model('Photo'),
+	Path = mongoose.model('Path'),
 	G = require('./general'),
 	lwip = require('lwip');
 
@@ -38,13 +39,15 @@ exports.update = function(req, res, next) {
 exports.delete = function(req, res, next) {
 	Photo.remove({dataSet:req.params.datasetId}, function(err, n) {
 		PhotoLocation.remove({dataSet:req.params.datasetId}, function(err, n) {
-			DataSet.findByIdAndRemove(req.params.datasetId, G.onSuccess(next, res));
+			Path.remove({dataSet:req.params.datasetId}, function(err, n) {
+				DataSet.findByIdAndRemove(req.params.datasetId, G.onSuccess(next, res));
+			});
 		});
 	});
 };
 
 exports.listLocations = function(req, res, next) {
-	PhotoLocation.find({dataSet:req.params.datasetId}).populate('photos').exec(G.onSuccess(next, res));
+	PhotoLocation.find({dataSet:req.params.datasetId}).populate('photos paths').exec(G.onSuccess(next, res));
 };
 
 exports.createLocation = function(req, res, next) {
@@ -75,6 +78,36 @@ exports.deleteLocation = function(req, res, next) {
 			G.onSuccess(next, res)
 		);
 	});
+};
+
+exports.listPaths = function(req, res, next) {
+	Path.find({dataSet:req.params.datasetId}).exec(G.onSuccess(next, res));
+};
+
+exports.createPath = function(req, res, next) {
+	DataSet.findById(req.params.datasetId, G.onSuccess(next, function(dataSet) {
+		var doc = extend({}, req.body);
+		doc.dataSet = dataSet._id;
+		Path.create(doc, G.onSuccess(next, function(path) {
+			if (path.toLocation) {
+				PhotoLocation.findOne({_id:path.toLocation, dataSet:req.params.datasetId}, G.onSuccess(next, function(location) {
+					location.paths.push(path._id);
+					location.save(G.onSuccess(next, function(doc) {
+						res.json(path);
+					}));
+				}));
+			} else {
+				res.json(path);
+			}
+		}));
+	}));
+};
+
+exports.deletePath = function(req, res, next) {
+	Path.findOneAndRemove(
+		{_id:req.params.pathId, dataSet:req.params.datasetId},
+		G.onSuccess(next, res)
+	);
 };
 
 exports.listPhotos = function(req, res, next) {
@@ -129,7 +162,7 @@ exports.getImageScaled = function(req, res, next) {
 				var cb = G.onSuccess(next, function(image) {
 					image.toBuffer('jpg', G.onSuccess(next, function(buffer) {
 						res.contentType('image/jpeg').send(buffer);
-					}))
+					}));
 				});
 				if (req.params.size == 'tiny') {
 					image.cover(200, 200, cb);
@@ -168,7 +201,7 @@ exports.uploadImage = function(req, res, next) {
 exports.details = function(req, res, next) {
 	DataSet.findById(req.params.datasetId, G.onSuccess(next, function(dataset) {
 		var out = dataset.toJSON();
-		PhotoLocation.find({dataSet:dataset._id}).populate('photos').exec(G.onSuccess(next, function(locations) {
+		PhotoLocation.find({dataSet:dataset._id}).populate('photos paths').exec(G.onSuccess(next, function(locations) {
 			out.locations = locations;
 			res.json(out);
 		}));

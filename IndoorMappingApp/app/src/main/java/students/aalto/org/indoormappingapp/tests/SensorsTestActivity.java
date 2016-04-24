@@ -66,7 +66,7 @@ public class SensorsTestActivity extends MenuRouterActivity {
 
                 canvas.drawColor(Color.WHITE);
 
-                float origo[] = {canvas.getWidth() / 2, canvas.getHeight() / 2};
+                float center[] = {canvas.getWidth() / 2, canvas.getHeight() / 2};
                 List<SensorsSnapshot> path = sensors.path;
 
                 // Walk path.
@@ -75,15 +75,15 @@ public class SensorsTestActivity extends MenuRouterActivity {
                 paint.setColor(Color.GRAY);
                 paint.setStrokeWidth(10);
                 for (int i = 0; i < path.size() - 1; i++) {
-                    float[] beg = screenPoint(origo, path.get(i).Coordinates);
-                    float[] end = screenPoint(origo, path.get(i+1).Coordinates);
+                    float[] beg = screenPoint(center, path.get(i).Coordinate);
+                    float[] end = screenPoint(center, path.get(i+1).Coordinate);
                     canvas.drawLine(beg[0], beg[1], end[0], end[1], paint);
                 }
 
                 // Current orientation.
                 paint.setColor(Color.RED);
                 float r = 30, d = 3 * r / 2;
-                float[] pos = screenPoint(origo, path.get(path.size() - 1).Coordinates);
+                float[] pos = screenPoint(center, path.get(path.size() - 1).Coordinate);
                 canvas.drawCircle(pos[0], pos[1], r, paint);
                 canvas.drawCircle(
                         pos[0] + d * (float) Math.cos(readings.azimuth()),
@@ -96,10 +96,10 @@ public class SensorsTestActivity extends MenuRouterActivity {
         });
     }
 
-    private float[] screenPoint(float[] origo, float[] xyz) {
+    private float[] screenPoint(float[] center, float[] xyz) {
         return new float[]{
-                origo[0] + zoom * xyz[0] - translate[0],
-                origo[1] - zoom * xyz[1] + translate[1]
+                center[0] + zoom * xyz[0] - translate[0],
+                center[1] - zoom * xyz[1] + translate[1]
         };
     }
 

@@ -162,10 +162,10 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
             Log.e("sensors", "No path start set");
         }
         SensorsSnapshot before = path.get(path.size() - 1);
-        readings.Coordinates = new float[]{
-                before.Coordinates[0] + stepLength * (float) Math.cos(readings.azimuth()),
-                before.Coordinates[1] + stepLength * (float) Math.sin(readings.azimuth()),
-                before.Coordinates[2]
+        readings.Coordinate = new float[]{
+                before.Coordinate[0] + stepLength * (float) Math.cos(readings.azimuth()),
+                before.Coordinate[1] + stepLength * (float) Math.sin(readings.azimuth()),
+                before.Coordinate[2]
         };
         path.add(readings);
     }
