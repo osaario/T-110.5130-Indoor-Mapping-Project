@@ -29,4 +29,5 @@
     <string name="action_tests">Tests</string>
     <string name="action_map">Map</string>
     <string name="action_pin_to_map">Pin to map</string>
+    <string name="place_under_cursor">Place under cursor</string>
 </resources>

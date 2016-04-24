@@ -209,8 +209,14 @@ public class MainActivity extends MenuRouterActivity {
                 for (int i = 0; i < photos.size(); i++) {
                     Location start = photos.get(i);
                     canvas.drawCircle(centerX + (float) start.X - translationX, centerY + (float) start.Y - translationY, 10, paint);
-
                 }
+
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(Color.GRAY);
+                paint.setStrokeWidth(2);
+
+                canvas.drawLine(centerX - 20f,  centerY, centerX + 20f, centerY, paint);
+                canvas.drawLine(centerX,centerY - 20f, centerX, centerY + 20f, paint);
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
 
 

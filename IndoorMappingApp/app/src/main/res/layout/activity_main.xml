@@ -88,7 +88,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/take_photo"/>
+            android:text="@string/place_under_cursor"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
