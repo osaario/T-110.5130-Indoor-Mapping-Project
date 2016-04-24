@@ -85,6 +85,10 @@ public class MainActivity extends MenuRouterActivity {
         final Button photoButton = (Button) findViewById(R.id.button_photo);
         final Button showLocationButton = (Button) findViewById(R.id.button_show_location);
 
+        final View selectedLocationContainer = (View) findViewById(R.id.stop_to_turn_label);
+        final TextView selectedLocName = (TextView) findViewById(R.id.selected_location_name);
+        final TextView selectedLocPhotos = (TextView) findViewById(R.id.selected_location_photos);
+
         if(ApplicationState.Instance().getSelectedLocation() == null) {
             photoButton.setVisibility(View.GONE);
             showLocationButton.setVisibility(View.VISIBLE);
@@ -258,10 +262,21 @@ public class MainActivity extends MenuRouterActivity {
 
                 float centerX = canvas.getWidth() / 2;
                 float centerY = canvas.getHeight() / 2;
-                Paint paint = new Paint();
-                paint.setStyle(Paint.Style.FILL);
-                paint.setColor(Color.RED);
-                paint.setStrokeWidth(10);
+
+                Paint paintRed = new Paint();
+                paintRed.setStyle(Paint.Style.FILL);
+                paintRed.setColor(Color.RED);
+                paintRed.setStrokeWidth(10);
+
+                Paint paintYellow = new Paint();
+                paintYellow.setStyle(Paint.Style.FILL);
+                paintYellow.setColor(Color.MAGENTA);
+                paintYellow.setStrokeWidth(10);
+
+                Paint paintGreen = new Paint();
+                paintGreen.setStyle(Paint.Style.FILL);
+                paintGreen.setColor(Color.GREEN);
+                paintGreen.setStrokeWidth(10);
 
 
                 float scaleX = listTransitionAndZoomPair.second.Zoom;
@@ -269,16 +284,34 @@ public class MainActivity extends MenuRouterActivity {
                 translationX = listTransitionAndZoomPair.second.X;
                 translationY = listTransitionAndZoomPair.second.Y;
 
+                selectedLocationContainer.setVisibility(View.GONE);
+                for(Location loc : photos) {
+                    if(loc.X > translationX - 10 && loc.X < translationX + 10 && loc.Y > translationY - 10 && loc.Y < translationY + 10) {
+                        selectedLocationContainer.setVisibility(View.VISIBLE);
+                        selectedLocName.setText(loc.Name);
+                        selectedLocPhotos.setText(loc.Photos.size() + " photos");
+                    }
+                }
+
                 canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
                         ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
                 canvas.scale(scaleX, scaleY);
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
-                paint.setColor(Color.BLUE);
                 for (int i = 0; i < photos.size(); i++) {
                     Location start = photos.get(i);
-                    canvas.drawCircle(centerX + (float) start.X - translationX, centerY + (float) start.Y - translationY, 10, paint);
+                    Paint tmpPaint;
+                    if(start.Photos == null || start.Photos.size() == 0) {
+                        tmpPaint = paintRed;
+                    } else if(start.Photos.size() < 3) {
+                        tmpPaint = paintYellow;
+                    } else {
+                        tmpPaint = paintGreen;
+                    }
+
+                    canvas.drawCircle(centerX + (float) start.X - translationX, centerY + (float) start.Y - translationY, 10, tmpPaint);
                 }
 
+                Paint paint = new Paint();
                 paint.setStyle(Paint.Style.FILL);
                 paint.setColor(Color.GRAY);
                 paint.setStrokeWidth(2);
