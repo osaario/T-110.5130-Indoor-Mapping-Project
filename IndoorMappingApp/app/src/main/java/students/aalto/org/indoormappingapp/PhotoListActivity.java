@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import rx.Observable;
+import rx.Subscription;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import students.aalto.org.indoormappingapp.adapters.PhotoListAdapter;
@@ -47,6 +48,7 @@ public class PhotoListActivity extends AppCompatActivity {
     ProgressBar progress;
     FloatingActionButton button;
     PhotoListAdapter adapter;
+    private Subscription subscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +93,7 @@ public class PhotoListActivity extends AppCompatActivity {
         list.setAdapter(adapter);
 
         final Context context = this;
-        NetworkService.getPhotos(datasetId, locationId).subscribe(new Action1<List<Photo>>() {
+        subscription = NetworkService.getPhotos(datasetId, locationId).subscribe(new Action1<List<Photo>>() {
 
             @Override
             public void call(List<Photo> photos) {
@@ -100,6 +102,12 @@ public class PhotoListActivity extends AppCompatActivity {
                 progress.setVisibility(View.GONE);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        subscription.unsubscribe();
     }
 
     @Override
