@@ -9,8 +9,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="students.aalto.org.indoormappingapp.TestActivity"
-    tools:showIn="@layout/activity_test">
+    tools:context=".tests.ServiceTestActivity"
+    tools:showIn="@layout/activity_test_service">
 
     <TextView
         android:layout_width="match_parent"

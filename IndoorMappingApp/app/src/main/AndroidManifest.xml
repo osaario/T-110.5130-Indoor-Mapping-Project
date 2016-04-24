@@ -70,14 +70,20 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".TestActivity"
+            android:name=".EditBuildingActivity"
+            android:label="@string/title_activity_edit_building"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".tests.ServiceTestActivity"
             android:label="Testing Stuff"
             android:parentActivityName=".HomeActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".EditBuildingActivity"
-            android:label="@string/title_activity_edit_building"
+            android:name=".tests.SensorsTestActivity"
+            android:label="@string/title_activity_sensors_test"
+            android:parentActivityName=".HomeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

@@ -5,16 +5,37 @@ package students.aalto.org.indoormappingapp.sensors;
  */
 public class SensorsSnapshot {
     public long Timestamp;
+    public float[] Orientation;
+    public float[] Gyroscope;
     public float[] Magnetic;
     public float[] Accelerometer;
-    public float[] Orientation;
-    public Integer Azimut;
+    public float[] Coordinates;
 
-    public SensorsSnapshot(long timestamp, float[] magnetic, float[] accelerometer) {
-        Timestamp = timestamp;
-        Magnetic = magnetic;
-        Accelerometer = accelerometer;
+    public static SensorsSnapshot initial(float[] coordinates) {
+        SensorsSnapshot sensors = new SensorsSnapshot();
+        sensors.Coordinates = coordinates;
+        return sensors;
+    }
+
+    public SensorsSnapshot() {
+        Timestamp = 0;
         Orientation = null;
-        Azimut = null;
+        Gyroscope = null;
+        Magnetic = null;
+        Accelerometer = null;
+        Coordinates = null;
+    }
+
+    public SensorsSnapshot(long timestamp, float[] orientation) {
+        Timestamp = timestamp;
+        Orientation = orientation;
+        Gyroscope = null;
+        Magnetic = null;
+        Accelerometer = null;
+        Coordinates = null;
+    }
+
+    public float azimuth() {
+        return Orientation != null ? Orientation[0] : 0;
     }
 }

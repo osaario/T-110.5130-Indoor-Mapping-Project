@@ -5,6 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import students.aalto.org.indoormappingapp.tests.SensorsTestActivity;
+import students.aalto.org.indoormappingapp.tests.ServiceTestActivity;
+
 public abstract class MenuRouterActivity extends AppCompatActivity {
 
     @Override
@@ -18,7 +21,8 @@ public abstract class MenuRouterActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_test) {
-            Intent intent = new Intent(getApplicationContext(), TestActivity.class);
+            //Intent intent = new Intent(getApplicationContext(), ServiceTestActivity.class);
+            Intent intent = new Intent(getApplicationContext(), SensorsTestActivity.class);
             startActivity(intent);
             return true;
         }

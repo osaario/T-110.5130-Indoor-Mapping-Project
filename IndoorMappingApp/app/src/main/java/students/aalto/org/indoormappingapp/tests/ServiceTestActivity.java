@@ -1,4 +1,4 @@
-package students.aalto.org.indoormappingapp;
+package students.aalto.org.indoormappingapp.tests;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -12,19 +12,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.List;
 
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import students.aalto.org.indoormappingapp.R;
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.model.Photo;
 import students.aalto.org.indoormappingapp.services.ImageUpload;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
-public class TestActivity extends AppCompatActivity {
+public class ServiceTestActivity extends AppCompatActivity {
 
     static final int REQUEST_TAKE_PHOTO = 1;
 
@@ -35,7 +35,7 @@ public class TestActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test);
+        setContentView(R.layout.activity_test_service);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

@@ -12,9 +12,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
-import rx.functions.Func1;
+import rx.Observable;
 import rx.subjects.PublishSubject;
 import students.aalto.org.indoormappingapp.R;
 
@@ -23,27 +24,33 @@ import students.aalto.org.indoormappingapp.R;
  */
 public class SensorsFragment extends Fragment implements SensorEventListener {
 
-    public rx.Observable<SensorsSnapshot> orientationObservable;
-    public rx.Observable<SensorsSnapshot> stepObservable;
+    public Observable<SensorsSnapshot> orientationObservable;
+    public List<SensorsSnapshot> path = new ArrayList<>(50);
 
     private PublishSubject<SensorsSnapshot> orientationSubject = PublishSubject.create();
-    private PublishSubject<SensorsSnapshot> stepSubject = PublishSubject.create();
 
     boolean useAndroidStepSensor = true;
-    float stepLength = 10;
+    float stepLength = 1.0f;
 
     SensorManager sensorManager;
     Sensor stepSensor;
-    Sensor rotationSensor; // TODO decide if acc+mag is better
+    Sensor rotationSensor;
+    Sensor gyroSensor;
     Sensor magneticSensor;
     Sensor accelerationSensor;
+
+    CustomStepDetector customStepDetector;
 
     public SensorsFragment() {
     }
 
     public static SensorsFragment newInstance() {
-        SensorsFragment fragment = new SensorsFragment();
-        return fragment;
+        return new SensorsFragment();
+    }
+
+    public void startFrom(float[] coordinates) {
+        path.clear();
+        path.add(SensorsSnapshot.initial(coordinates));
     }
 
     @Override
@@ -54,36 +61,33 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        // TODO Get useAndroidStepSensor and stepLength from settings (singleton)
-
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        //rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         magneticSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         accelerationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
 
-        //sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, gyroSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, magneticSensor, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, accelerationSensor, SensorManager.SENSOR_DELAY_GAME);
 
         if (useAndroidStepSensor && stepSensor != null) {
             sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_GAME);
+        } else {
+            customStepDetector = new CustomStepDetector();
         }
 
         orientationObservable = orientationSubject.replay().refCount();
 
-        stepObservable = stepSubject.filter(new Func1<SensorsSnapshot, Boolean>() {
-            @Override
-            public Boolean call(SensorsSnapshot sensor) {
-                if (sensor == null) {
-                    Log.d("sensors", "Sensor readings missing for step");
-                    return false;
-                }
-                return true;
-            }
-        }).replay().refCount();
-
         return inflater.inflate(R.layout.fragment_sensors, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // TODO Get useAndroidStepSensor and stepLength from settings (singleton)
     }
 
     @Override
@@ -92,32 +96,37 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         sensorManager.unregisterListener(this);
     }
 
-    SensorsCache readings = new SensorsCache(100);
+    SensorsCache cache = new SensorsCache(100);
+    float[] gyroscope = null;
     float[] magnetic = null;
+    float[] accelerometer = null;
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         int type = event.sensor.getType();
         if (type == Sensor.TYPE_ROTATION_VECTOR) {
 
-            //TODO replace with acc+mag
+            SensorsSnapshot readings = new SensorsSnapshot(event.timestamp, orientationFromRotation(event.values));
+            readings.Gyroscope = gyroscope;
+            readings.Magnetic = magnetic;
+            readings.Accelerometer = accelerometer;
+            orientationSubject.onNext(readings);
+            cache.add(readings);
 
+        } else if (type == Sensor.TYPE_GYROSCOPE) {
+            gyroscope = event.values;
         } else if (type == Sensor.TYPE_MAGNETIC_FIELD) {
-
             magnetic = event.values;
+        } else if (type == Sensor.TYPE_ACCELEROMETER) {
+            accelerometer = event.values;
 
-        } else if (type == Sensor.TYPE_ACCELEROMETER && magnetic != null) {
-
-            SensorsSnapshot sensors = new SensorsSnapshot(event.timestamp, magnetic, event.values);
-            sensors.Orientation = orientationFromAccelerometerAndMagnetic(sensors.Accelerometer, sensors.Magnetic);
-            sensors.Azimut = (int) Math.round(Math.toDegrees(sensors.Orientation[0]));
-            orientationSubject.onNext(sensors);
-            readings.add(sensors);
+            if ((!useAndroidStepSensor || stepSensor == null) && customStepDetector.detect(event.timestamp, event.values)) {
+                step(cache.search(event.timestamp - customStepDetector.MIN_STEP_TIME / 2));
+            }
 
         } else if (type == Sensor.TYPE_STEP_DETECTOR) {
 
-            stepSubject.onNext(readings.search(event.timestamp));
-
+            step(cache.search(event.timestamp));
         }
     }
 
@@ -128,20 +137,37 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
     private float[] orientationFromRotation(float[] rotationValues) {
         float R[] = new float[16];
         SensorManager.getRotationMatrixFromVector(R, rotationValues);
-        float orientation[] = new float[3];
+        float orientation[] = {0, 0, 0};
         SensorManager.getOrientation(R, orientation);
         return orientation;
     }
 
     private float[] orientationFromAccelerometerAndMagnetic(float[] accelerometerValues, float[] magneticValues) {
-        float R[] = new float[9];
-        float I[] = new float[9];
+        float R[] = new float[16];
+        float I[] = new float[16];
         float orientation[] = {0, 0, 0};
         boolean success = SensorManager.getRotationMatrix(R, I, accelerometerValues, magneticValues);
         if (success) {
             SensorManager.getOrientation(R, orientation);
         }
         return orientation;
+    }
+
+    private void step(SensorsSnapshot readings) {
+        if (readings == null) {
+            Log.e("sensors", "Sensor readings missing for step");
+            return;
+        }
+        if (path.size() == 0) {
+            Log.e("sensors", "No path start set");
+        }
+        SensorsSnapshot before = path.get(path.size() - 1);
+        readings.Coordinates = new float[]{
+                before.Coordinates[0] + stepLength * (float) Math.cos(readings.azimuth()),
+                before.Coordinates[1] + stepLength * (float) Math.sin(readings.azimuth()),
+                before.Coordinates[2]
+        };
+        path.add(readings);
     }
 
 }

@@ -22,11 +22,15 @@ public class SensorsCache {
 
     public SensorsSnapshot search(long timestamp) {
         for (int i = 0; i < size; i++) {
-            SensorsSnapshot s = cache[(size + p - i) % size];
+            SensorsSnapshot s = last(i);
             if (s != null && s.Timestamp <= timestamp) {
                 return s;
             }
         }
         return cache[(p + 1) % size];
+    }
+
+    public SensorsSnapshot last(int skip) {
+        return cache[(size + p - skip) % size];
     }
 }

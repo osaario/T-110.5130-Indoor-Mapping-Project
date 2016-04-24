@@ -158,6 +158,11 @@ public class MainActivity extends MenuRouterActivity {
 
                     */
 
+        /**********************************************************
+         See tests/SensorsTestActivity for using the new step path.
+         Next up, NetworkService method to save such path.
+         **********************************************************
+
         sensors.stepObservable.doOnNext(new Action1<SensorsSnapshot>() {
             @Override
             public void call(SensorsSnapshot sensors) {
@@ -175,16 +180,16 @@ public class MainActivity extends MenuRouterActivity {
                 sensors.stepObservable.map(new Func1<SensorsSnapshot, MapPosition>() {
                     @Override
                     public MapPosition call(SensorsSnapshot sensors) {
-                        double x = Math.cos((double) sensors.Azimut * 0.0174532925) * 10;
-                        double y = Math.sin((double) sensors.Azimut * 0.0174532925) * 10;
+                        double x = Math.cos((double) sensors.azimuth()) * 10;
+                        double y = Math.sin((double) sensors.azimuth()) * 10;
                         int xx = (int) x;
                         int yy = (int) y;
                         Log.d("x", x + "");
                         Log.d("y", y + "");
-                        Log.d("azimuth", sensors.Azimut + "");
+                        Log.d("azimuth", sensors.azimuth() + "");
                         xTextView.setText("x" + x);
                         yTextView.setText("y" + y);
-                        azTextView.setText("az" + sensors.Azimut);
+                        azTextView.setText("az" + sensors.azimuth());
 
                         return new MapPosition(xx, yy, 0);
                     }
@@ -308,6 +313,7 @@ public class MainActivity extends MenuRouterActivity {
 
             }
         });
+        */
 
         /*final TextView helloView = (TextView) findViewById(R.id.hello_text_view);
         rx.Observable.interval(500, TimeUnit.MILLISECONDS).map(new Func1<Long, Long>() {

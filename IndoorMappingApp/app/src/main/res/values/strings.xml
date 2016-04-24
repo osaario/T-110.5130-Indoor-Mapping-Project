@@ -24,4 +24,5 @@
     <string name="title_activity_photo_list">Photos</string>
     <string name="title_activity_camera">CameraActivity</string>
     <string name="title_activity_edit_building">EditBuildingActivity</string>
+    <string name="title_activity_sensors_test">SensorsTestActivity</string>
 </resources>
