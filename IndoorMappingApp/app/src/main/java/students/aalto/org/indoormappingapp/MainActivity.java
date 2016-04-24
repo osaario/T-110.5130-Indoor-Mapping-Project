@@ -23,6 +23,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
@@ -32,39 +33,20 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.functions.Func3;
+import students.aalto.org.indoormappingapp.model.ApplicationState;
+import students.aalto.org.indoormappingapp.model.DataSet;
+import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.model.MapPosition;
+import students.aalto.org.indoormappingapp.model.Photo;
 import students.aalto.org.indoormappingapp.model.RenderData;
 import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 import students.aalto.org.indoormappingapp.sensors.SensorsSnapshot;
+import students.aalto.org.indoormappingapp.services.NetworkService;
 
 public class MainActivity extends MenuRouterActivity {
 
-    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-
-    final int gridSize = 100;
-    final int gridStep = 80;
     SurfaceHolder mSurfaceHolder;
-    String dataSetID;
-    private Uri fileUri;
 
-
-    private void drawGrid(Canvas canvas, int x_off, int y_off) {
-        //pixels
-        final int startX = -1000;
-        final int startY = -1000;
-        final int endY = 3000;
-
-        Paint paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.GRAY);
-        paint.setStrokeWidth(2);
-        for(int i = 0; i < gridSize; i++) {
-            canvas.drawLine(startX + gridStep * i + x_off, startY + y_off, startX + gridStep * i + x_off, endY + y_off, paint);
-        }
-        for(int i = 0; i < gridSize; i++) {
-            canvas.drawLine(startX + x_off, startY + gridStep * i + y_off, endY + x_off, startY + gridStep * i + y_off, paint);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,14 +55,10 @@ public class MainActivity extends MenuRouterActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        dataSetID = getIntent().getStringExtra("ID");
+        DataSet dataSet = ApplicationState.Instance().getSelectedDataSet();
+        Location location = ApplicationState.Instance().getSelectedLocation();
 
         final SurfaceView surfaceView = (SurfaceView) findViewById(R.id.main_map);
-        final TextView xTextView = (TextView) findViewById(R.id.x_text);
-        final TextView yTextView = (TextView) findViewById(R.id.y_text);
-        final TextView azTextView = (TextView) findViewById(R.id.az_text);
-        final TextView stopText = (TextView) findViewById(R.id.stop_to_turn_label);
-        final TextView okText = (TextView) findViewById(R.id.ok_to_turn_label);
 
         final Button leftButton = (Button) findViewById(R.id.button_left);
         final Button stepButton = (Button) findViewById(R.id.button_step);
@@ -252,32 +230,30 @@ public class MainActivity extends MenuRouterActivity {
             }
         });
 
+         */
+        NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID).subscribe(new Action1<List<Location>>() {
 
-        Observable.combineLatest(positionObs, photoTakenObs, zoomObservable, new Func3<ArrayList<MapPosition>, ArrayList<MapPosition>, Float, RenderData>() {
             @Override
-            public RenderData call(ArrayList<MapPosition> mapPositions, ArrayList<MapPosition> mapPositions2, Float aFloat) {
-                return new RenderData(mapPositions, mapPositions2, aFloat);
-            }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<RenderData>() {
-            @Override
-            public void call(RenderData renderData) {
+            public void call(List<Location> photos) {
                 if (mSurfaceHolder == null) return;
 
-                ArrayList<MapPosition> positions = renderData.Positions;
-                ArrayList<MapPosition> photos = renderData.Photos;
                 Canvas canvas = mSurfaceHolder.lockCanvas();
                 if (canvas == null) return;
                 canvas.drawColor(Color.WHITE);
 
-                int centerX = canvas.getWidth() / 2;
-                int centerY = canvas.getHeight() / 2;
+                float centerX = canvas.getWidth() / 2;
+                float centerY = canvas.getHeight() / 2;
                 Paint paint = new Paint();
                 paint.setStyle(Paint.Style.FILL);
                 paint.setColor(Color.RED);
                 paint.setStrokeWidth(10);
 
-                Integer translationX;
-                Integer translationY;
+
+                float scaleX = 1.0f;
+                float scaleY = 1.0f;
+                float translationX = 0;
+                float translationY = 0;
+                /*
                 if (positions.size() > 0) {
                     translationX = positions.get(positions.size() - 1).X;
                     translationY = positions.get(positions.size() - 1).Y;
@@ -288,32 +264,23 @@ public class MainActivity extends MenuRouterActivity {
 
                 float scaleX = renderData.ZoomLevel;
                 float scaleY = scaleX;
+                */
 
                 canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
                         ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
                 canvas.scale(scaleX, scaleY);
-                drawGrid(canvas, -translationX % gridStep, -translationY % gridStep);
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
-                for (int i = 0; i < positions.size(); i++) {
-                    MapPosition start = positions.get(i);
-                    MapPosition end = positions.size() > i + 1 ? positions.get(i + 1) : null;
-                    if (end != null) {
-                        canvas.drawLine(centerX + start.X - translationX, centerY + start.Y - translationY, centerX + end.X - translationX, centerY + end.Y - translationY, paint);
-                    } else {
-                        canvas.drawCircle(centerX + start.X - translationX, centerY + start.Y - translationY, 10, paint);
-                    }
-                }
                 paint.setColor(Color.BLUE);
                 for (int i = 0; i < photos.size(); i++) {
-                    MapPosition start = photos.get(i);
-                    canvas.drawCircle(centerX + start.X - translationX, centerY + start.Y - translationY, 10, paint);
+                    Location start = photos.get(i);
+                    canvas.drawCircle(centerX + (float)start.X - translationX, centerY + (float)start.Y - translationY, 10, paint);
 
                 }
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
 
             }
         });
-        */
+
 
         /*final TextView helloView = (TextView) findViewById(R.id.hello_text_view);
         rx.Observable.interval(500, TimeUnit.MILLISECONDS).map(new Func1<Long, Long>() {
@@ -381,64 +348,5 @@ public class MainActivity extends MenuRouterActivity {
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                // Image captured and saved to fileUri specified in the Intent
-                Toast.makeText(this, "Image saved to:\n" +
-                        fileUri, Toast.LENGTH_LONG).show();
-            } else if (resultCode == RESULT_CANCELED) {
-                // User cancelled the image capture
-            } else {
-                // Image capture failed, advise user
-            }
-        }
-
-    }
-
-    /**
-     * Create a file Uri for saving an image or video
-     */
-    private static Uri getOutputMediaFileUri(int type) {
-        return Uri.fromFile(getOutputMediaFile(type));
-    }
-
-    /**
-     * Create a File for saving an image or video
-     */
-    private static File getOutputMediaFile(int type) {
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "MyCameraApp");
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                Log.d("MyCameraApp", "failed to create directory");
-                return null;
-            }
-        }
-
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_" + timeStamp + ".jpg");
-        } else if (type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_" + timeStamp + ".mp4");
-        } else {
-            return null;
-        }
-
-        return mediaFile;
-    }
 
 }

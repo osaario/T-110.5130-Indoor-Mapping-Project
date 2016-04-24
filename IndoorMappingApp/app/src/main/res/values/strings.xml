@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Indoor Mapping</string>
     <string name="action_settings">Settings</string>
+    <string name="action_edit">Edit</string>
     <string name="title_activity_floor">FloorActivity</string>
     <string name="turn_left">Left</string>
     <string name="take_step">Step</string>
@@ -25,4 +26,5 @@
     <string name="title_activity_camera">CameraActivity</string>
     <string name="title_activity_edit_building">EditBuildingActivity</string>
     <string name="title_activity_sensors_test">SensorsTestActivity</string>
+    <string name="action_tests">Tests</string>
 </resources>
