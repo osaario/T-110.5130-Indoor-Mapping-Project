@@ -27,4 +27,5 @@
     <string name="title_activity_edit_building">EditBuildingActivity</string>
     <string name="title_activity_sensors_test">SensorsTestActivity</string>
     <string name="action_tests">Tests</string>
+    <string name="action_map">Map</string>
 </resources>
