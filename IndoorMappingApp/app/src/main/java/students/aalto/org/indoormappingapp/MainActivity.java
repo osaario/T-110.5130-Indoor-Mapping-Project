@@ -10,8 +10,11 @@ import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -43,6 +46,17 @@ import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 import students.aalto.org.indoormappingapp.sensors.SensorsSnapshot;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
+class TransitionAndZoom {
+    public TransitionAndZoom(float x,float y,float zoom) {
+        X = x;
+        Y = y;
+        Zoom = zoom;
+    }
+    public Float X;
+    public Float Y;
+    public Float Zoom;
+}
+
 public class MainActivity extends MenuRouterActivity {
 
     SurfaceHolder mSurfaceHolder;
@@ -64,7 +78,6 @@ public class MainActivity extends MenuRouterActivity {
         final Button stepButton = (Button) findViewById(R.id.button_step);
         final Button rightButton = (Button) findViewById(R.id.button_right);
         final Button photoButton = (Button) findViewById(R.id.button_photo);
-
 
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
@@ -116,127 +129,61 @@ public class MainActivity extends MenuRouterActivity {
             }
         });
 
-
-
-        SensorsFragment sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
-        /*
-        Observable<Integer> buttonStepObservable = Observable.create(new Observable.OnSubscribe<Integer>() {
+        Observable<Pair<Float, Float>> translationObservable = Observable.create(new Observable.OnSubscribe<Pair<Float, Float>>() {
             @Override
-            public void call(final Subscriber<? super Integer> subscriber) {
-                stepButton.setOnClickListener(new View.OnClickListener() {
+            public void call(final Subscriber<? super Pair<Float, Float>> subscriber) {
+                final Float[] downX = {null};
+                final Float[] downY = {null};
+                surfaceView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
-                    public void onClick(View v) {
-                        subscriber.onNext(1);
-                    }
-                });
-            }
-        }).mergeWith(sensors.stepWithDirectionObservable).replay().refCount();
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                            downX[0] = motionEvent.getX();
+                            downY[0] = motionEvent.getY();
+                        } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                            if (downX[0] != null && downY[0] != null) {
+                                subscriber.onNext(new Pair<Float, Float>(-(motionEvent.getX() - downX[0]), -(motionEvent.getY() - downY[0])));
+                                downX[0] = motionEvent.getX();
+                                downY[0] = motionEvent.getY();
 
-
-
-                    */
-
-        /**********************************************************
-         See tests/SensorsTestActivity for using the new step path.
-         Next up, NetworkService method to save such path.
-         **********************************************************
-
-        sensors.stepObservable.doOnNext(new Action1<SensorsSnapshot>() {
-            @Override
-            public void call(SensorsSnapshot sensors) {
-                stopText.setVisibility(View.VISIBLE);
-                okText.setVisibility(View.INVISIBLE);
-            }
-        }).debounce(5, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<SensorsSnapshot>() {
-            @Override
-            public void call(SensorsSnapshot sensors) {
-                stopText.setVisibility(View.INVISIBLE);
-                okText.setVisibility(View.VISIBLE);
-            }
-        });
-        rx.Observable<MapPosition> direction =
-                sensors.stepObservable.map(new Func1<SensorsSnapshot, MapPosition>() {
-                    @Override
-                    public MapPosition call(SensorsSnapshot sensors) {
-                        double x = Math.cos((double) sensors.azimuth()) * 10;
-                        double y = Math.sin((double) sensors.azimuth()) * 10;
-                        int xx = (int) x;
-                        int yy = (int) y;
-                        Log.d("x", x + "");
-                        Log.d("y", y + "");
-                        Log.d("azimuth", sensors.azimuth() + "");
-                        xTextView.setText("x" + x);
-                        yTextView.setText("y" + y);
-                        azTextView.setText("az" + sensors.azimuth());
-
-                        return new MapPosition(xx, yy, 0);
+                            }
+                        } else if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                            downX[0] = null;
+                            downY[0] = null;
+                        }
+                        return true;
                     }
                 });
 
-        Observable<ArrayList<MapPosition>> positionObs = direction.scan(new Func2<MapPosition, MapPosition, MapPosition>() {
-            @Override
-            public MapPosition call(MapPosition mapPosition, MapPosition mapPosition2) {
-                if (mapPosition == null) mapPosition = new MapPosition(0, 0, 0);
-                return new MapPosition(mapPosition.X + mapPosition2.X, mapPosition.Y + mapPosition2.Y, 0);
             }
-        }).scan(new ArrayList<MapPosition>(), new Func2<ArrayList<MapPosition>, MapPosition, ArrayList<MapPosition>>() {
+        }).scan(new Func2<Pair<Float, Float>, Pair<Float, Float>, Pair<Float, Float>>() {
             @Override
-            public ArrayList<MapPosition> call(ArrayList<MapPosition> mapPositions, MapPosition integer) {
-                mapPositions.add(integer);
-                return mapPositions;
-            }
-        }).replay(1).refCount();
-
-        Observable<ArrayList<MapPosition>> photoTakenObs = Observable.create(new Observable.OnSubscribe<Integer>() {
-
-            @Override
-            public void call(final Subscriber<? super Integer> subscriber) {
-                photoButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        subscriber.onNext(0);
-                    }
-                });
-            }
-        }).withLatestFrom(positionObs, new Func2<Integer, ArrayList<MapPosition>, MapPosition>() {
-            @Override
-            public MapPosition call(Integer integer, ArrayList<MapPosition> mapPositions) {
-                if (mapPositions.size() > 0) {
-                    return mapPositions.get(mapPositions.size() - 1);
-                } else {
-                    //return null;
-                    return new MapPosition(0, 0, 0);
-                }
-            }
-        }).filter(new Func1<MapPosition, Boolean>() {
-            @Override
-            public Boolean call(MapPosition mapPosition) {
-                return mapPosition != null;
-            }
-        }).scan(new ArrayList<MapPosition>(), new Func2<ArrayList<MapPosition>, MapPosition, ArrayList<MapPosition>>() {
-            @Override
-            public ArrayList<MapPosition> call(ArrayList<MapPosition> mapPositions, MapPosition last) {
-                mapPositions.add(last);
-
-                // Start create location.
-                Intent intent = new Intent(getApplicationContext(), LocationActivity.class);
-                intent.putExtra(LocationActivity.DATASET_ID, dataSetID);
-                intent.putExtra(LocationActivity.X_COORDINATE, last.X);
-                intent.putExtra(LocationActivity.Y_COORDINATE, last.Y);
-                intent.putExtra(LocationActivity.Z_COORDINATE, last.Z);
-                startActivity(intent);
-
-                return mapPositions;
+            public Pair<Float, Float> call(Pair<Float, Float> floatFloatPair, Pair<Float, Float> floatFloatPair2) {
+                floatFloatPair = floatFloatPair == null ? new Pair<Float, Float>(0f, 0f) : floatFloatPair;
+                //accumulate
+                return new Pair<Float, Float>(floatFloatPair.first + floatFloatPair2.first, floatFloatPair.second + floatFloatPair2.second);
             }
         });
 
-         */
-        NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID).subscribe(new Action1<List<Location>>() {
-
+        Observable<TransitionAndZoom> transitionAndZoomObservable = Observable.combineLatest(zoomObservable, translationObservable, new Func2<Float, Pair<Float, Float>, TransitionAndZoom>() {
             @Override
-            public void call(List<Location> photos) {
+            public TransitionAndZoom call(Float aFloat, Pair<Float, Float> floatFloatPair) {
+                TransitionAndZoom t = new TransitionAndZoom(floatFloatPair.first, floatFloatPair.second, aFloat);
+                return t;
+            }
+        }).startWith(new TransitionAndZoom(0f,0f,1f));
+
+        Observable.combineLatest(NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID), transitionAndZoomObservable, new Func2<List<Location>, TransitionAndZoom, Pair<List<Location>, TransitionAndZoom>>() {
+            @Override
+            public Pair<List<Location>, TransitionAndZoom> call(List<Location> locations, TransitionAndZoom transitionAndZoom) {
+                return new Pair<List<Location>, TransitionAndZoom>(locations, transitionAndZoom);
+            }
+        }).subscribe(new Action1<Pair<List<Location>, TransitionAndZoom>>() {
+            @Override
+            public void call(Pair<List<Location>, TransitionAndZoom> listTransitionAndZoomPair) {
                 if (mSurfaceHolder == null) return;
 
+                List<Location> photos = listTransitionAndZoomPair.first;
                 Canvas canvas = mSurfaceHolder.lockCanvas();
                 if (canvas == null) return;
                 canvas.drawColor(Color.WHITE);
@@ -249,22 +196,10 @@ public class MainActivity extends MenuRouterActivity {
                 paint.setStrokeWidth(10);
 
 
-                float scaleX = 1.0f;
-                float scaleY = 1.0f;
-                float translationX = 0;
-                float translationY = 0;
-                /*
-                if (positions.size() > 0) {
-                    translationX = positions.get(positions.size() - 1).X;
-                    translationY = positions.get(positions.size() - 1).Y;
-                } else {
-                    translationX = 0;
-                    translationY = 0;
-                }
-
-                float scaleX = renderData.ZoomLevel;
-                float scaleY = scaleX;
-                */
+                float scaleX = listTransitionAndZoomPair.second.Zoom;
+                float scaleY = listTransitionAndZoomPair.second.Zoom;
+                float translationX = listTransitionAndZoomPair.second.X;
+                float translationY = listTransitionAndZoomPair.second.Y;
 
                 canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
                         ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
@@ -273,13 +208,15 @@ public class MainActivity extends MenuRouterActivity {
                 paint.setColor(Color.BLUE);
                 for (int i = 0; i < photos.size(); i++) {
                     Location start = photos.get(i);
-                    canvas.drawCircle(centerX + (float)start.X - translationX, centerY + (float)start.Y - translationY, 10, paint);
+                    canvas.drawCircle(centerX + (float) start.X - translationX, centerY + (float) start.Y - translationY, 10, paint);
 
                 }
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
 
+
             }
         });
+
 
 
         /*final TextView helloView = (TextView) findViewById(R.id.hello_text_view);
@@ -335,6 +272,7 @@ public class MainActivity extends MenuRouterActivity {
         });
         */
     }
+
 
     @Override
     protected void onResume() {
