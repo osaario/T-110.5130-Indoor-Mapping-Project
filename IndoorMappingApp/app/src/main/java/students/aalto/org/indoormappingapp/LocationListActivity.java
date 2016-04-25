@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,8 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -25,17 +22,17 @@ import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.services.NetworkService;
-import students.aalto.org.indoormappingapp.tests.SensorsTestActivity;
 
 public class LocationListActivity extends AppCompatActivity {
 
+    private ProgressDialog dialog;
     private LocationListAdapter listAdapter;
     private Subscription loadSubscription;
     DataSet dataSet;
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         loadSubscription.unsubscribe();
     }
 
@@ -75,6 +72,17 @@ public class LocationListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         ApplicationState.Instance().setSelectedLocation(null);
+
+        dialog.show();
+        loadSubscription = NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID)
+                .subscribe(new Action1<List<Location>>() {
+                    @Override
+                    public void call(List<Location> locations) {
+                        dialog.hide();
+                        listAdapter.clear();
+                        listAdapter.addAll(locations);
+                    }
+                });
     }
 
     @Override
@@ -105,7 +113,8 @@ public class LocationListActivity extends AppCompatActivity {
         });
 
         ListView locationListView = (ListView) findViewById(R.id.location_list_view);
-        final ProgressDialog dialog = new ProgressDialog(this);
+
+        dialog = new ProgressDialog(this);
         dialog.setIndeterminate(true);
         dialog.setCancelable(false);
         dialog.setMessage(getString(R.string.loading));
@@ -123,17 +132,6 @@ public class LocationListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        dialog.show();
-        loadSubscription = NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID)
-                .subscribe(new Action1<List<Location>>() {
-                    @Override
-                    public void call(List<Location> locations) {
-                        dialog.hide();
-                        listAdapter.clear();
-                        listAdapter.addAll(locations);
-                    }
-                });
     }
 
 }
