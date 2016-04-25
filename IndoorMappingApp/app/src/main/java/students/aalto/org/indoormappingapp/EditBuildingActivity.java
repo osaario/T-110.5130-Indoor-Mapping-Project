@@ -1,14 +1,11 @@
 package students.aalto.org.indoormappingapp;
 
-import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -20,12 +17,9 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import rx.Observable;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.DataSet;
-import students.aalto.org.indoormappingapp.model.Photo;
 import students.aalto.org.indoormappingapp.services.ImageUpload;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
@@ -86,6 +80,10 @@ public class EditBuildingActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            bar.setDisplayHomeAsUpEnabled(true);
+        }
 
         dataSet = ApplicationState.Instance().getSelectedDataSet();
         String title = "Edit " + dataSet.Name;

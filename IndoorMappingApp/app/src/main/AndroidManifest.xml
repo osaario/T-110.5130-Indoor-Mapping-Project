@@ -71,7 +71,7 @@
         <activity
             android:name=".EditBuildingActivity"
             android:label="@string/title_activity_edit_building"
-            android:parentActivityName=".HomeActivity"
+            android:parentActivityName=".LocationListActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
