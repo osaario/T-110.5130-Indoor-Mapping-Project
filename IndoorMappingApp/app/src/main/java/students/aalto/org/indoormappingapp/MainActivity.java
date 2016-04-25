@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -75,6 +76,7 @@ public class MainActivity extends MenuRouterActivity {
     private Float translationY = 0f;
     private List<Location> photos;
     private Location recordStartLoc;
+    private Subscription subscription;
 
 
     public static Bitmap getBitmapFromURL(String src) {
@@ -318,7 +320,7 @@ public class MainActivity extends MenuRouterActivity {
         });
 
         dialog.show();
-        Observable.combineLatest(NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID).map(new Func1<List<Location>, List<Location>>() {
+        subscription = Observable.combineLatest(NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID).map(new Func1<List<Location>, List<Location>>() {
             @Override
             public List<Location> call(List<Location> locations) {
                 if(ApplicationState.Instance().getSelectedLocation() == null) return locations;
@@ -350,31 +352,30 @@ public class MainActivity extends MenuRouterActivity {
                 float centerX = canvas.getWidth() / 2;
                 float centerY = canvas.getHeight() / 2;
 
-                Paint paintRed = new Paint();
-                paintRed.setStyle(Paint.Style.FILL);
-                paintRed.setColor(Color.RED);
-                paintRed.setStrokeWidth(10);
-
-                Paint paintYellow = new Paint();
-                paintYellow.setStyle(Paint.Style.FILL);
-                paintYellow.setColor(Color.MAGENTA);
-                paintYellow.setStrokeWidth(10);
-
-                Paint paintGreen = new Paint();
-                paintGreen.setStyle(Paint.Style.FILL);
-                paintGreen.setColor(Color.GREEN);
-                paintGreen.setStrokeWidth(10);
-
-
-
                 float scaleX = listTransitionAndZoomPair.second.Zoom;
                 float scaleY = listTransitionAndZoomPair.second.Zoom;
                 translationX = listTransitionAndZoomPair.second.X;
                 translationY = listTransitionAndZoomPair.second.Y;
 
+                Paint paintRed = new Paint();
+                paintRed.setStyle(Paint.Style.FILL);
+                paintRed.setColor(Color.RED);
+                paintRed.setStrokeWidth(10f / scaleX);
+
+                Paint paintYellow = new Paint();
+                paintYellow.setStyle(Paint.Style.FILL);
+                paintYellow.setColor(Color.MAGENTA);
+                paintYellow.setStrokeWidth(10f / scaleX);
+
+                Paint paintGreen = new Paint();
+                paintGreen.setStyle(Paint.Style.FILL);
+                paintGreen.setColor(Color.GREEN);
+                paintGreen.setStrokeWidth(10f / scaleX);
+
+
                 selectedLocationContainer.setVisibility(View.GONE);
-                for(Location loc : photos) {
-                    if(loc.X > translationX - 10 && loc.X < translationX + 10 && loc.Y > translationY - 10 && loc.Y < translationY + 10) {
+                for (Location loc : photos) {
+                    if (loc.X > translationX - 10 && loc.X < translationX + 10 && loc.Y > translationY - 10 && loc.Y < translationY + 10) {
                         selectedLocationContainer.setVisibility(View.VISIBLE);
                         selectedLocName.setText(loc.Name);
                         selectedLocPhotos.setText(loc.Photos.size() + " photos");
@@ -384,16 +385,16 @@ public class MainActivity extends MenuRouterActivity {
                 canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
                         ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
                 canvas.scale(scaleX + 0.01f, scaleY + 0.01f);
-                if(listTransitionAndZoomPair.second.BackgroundImage != null) {
-                    canvas.drawBitmap(listTransitionAndZoomPair.second.BackgroundImage, -translationX,-translationY, null);
+                if (listTransitionAndZoomPair.second.BackgroundImage != null) {
+                    canvas.drawBitmap(listTransitionAndZoomPair.second.BackgroundImage, -translationX, -translationY, null);
                 }
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
                 for (int i = 0; i < photos.size(); i++) {
                     Location start = photos.get(i);
                     Paint tmpPaint;
-                    if(start.Photos == null || start.Photos.size() == 0) {
+                    if (start.Photos == null || start.Photos.size() == 0) {
                         tmpPaint = paintRed;
-                    } else if(start.Photos.size() < 3) {
+                    } else if (start.Photos.size() < 3) {
                         tmpPaint = paintYellow;
                     } else {
                         tmpPaint = paintGreen;
@@ -404,13 +405,19 @@ public class MainActivity extends MenuRouterActivity {
 
                 Paint paint = new Paint();
                 paint.setStyle(Paint.Style.FILL);
-                paint.setColor(Color.GRAY);
-                paint.setStrokeWidth(2);
+                paint.setColor(Color.BLUE);
+                paint.setStrokeWidth(5);
 
                 canvas.drawLine(centerX - 20f, centerY, centerX + 20f, centerY, paint);
                 canvas.drawLine(centerX, centerY - 20f, centerX, centerY + 20f, paint);
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
 
+
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                Toast.makeText(MainActivity.this, R.string.network_error, Toast.LENGTH_LONG);
 
             }
         });
@@ -500,6 +507,12 @@ public class MainActivity extends MenuRouterActivity {
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        subscription.unsubscribe();
     }
 
     public static final int MEDIA_TYPE_IMAGE = 1;
