@@ -37,4 +37,8 @@
     <string name="network_error">Network error</string>
     <string name="sending">Sending</string>
     <string name="select_map_photo">Take a floor plan photo</string>
+    <string name="start_record">Start path</string>
+    <string name="end_record">End path</string>
+    <string name="record_ended">Path recording ended</string>
+    <string name="start_walking">Path record started. Walk to destination.</string>
 </resources>

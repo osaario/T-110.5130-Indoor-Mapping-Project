@@ -74,6 +74,7 @@ public class MainActivity extends MenuRouterActivity {
     private Float translationX = 0f;
     private Float translationY = 0f;
     private List<Location> photos;
+    private Location recordStartLoc;
 
 
     public static Bitmap getBitmapFromURL(String src) {
@@ -89,6 +90,15 @@ public class MainActivity extends MenuRouterActivity {
             // Log exception
             return null;
         }
+    }
+
+    private Location locationUnderCursor() {
+        for(Location loc : photos) {
+            if(loc.X > translationX - 10 && loc.X < translationX + 10 && loc.Y > translationY - 10 && loc.Y < translationY + 10) {
+                return loc;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -113,6 +123,8 @@ public class MainActivity extends MenuRouterActivity {
         final Button rightButton = (Button) findViewById(R.id.button_right);
         final Button photoButton = (Button) findViewById(R.id.button_photo);
         final Button showLocationButton = (Button) findViewById(R.id.button_show_location);
+        final Button startRecordButton = (Button) findViewById(R.id.button_start_record);
+        final Button endRecordButton = (Button) findViewById(R.id.button_end_record);
 
         final View selectedLocationContainer = (View) findViewById(R.id.stop_to_turn_label);
         final TextView selectedLocName = (TextView) findViewById(R.id.selected_location_name);
@@ -125,6 +137,35 @@ public class MainActivity extends MenuRouterActivity {
             photoButton.setVisibility(View.VISIBLE);
             showLocationButton.setVisibility(View.GONE);
         }
+
+        if(ApplicationState.Instance().getSelectedLocation() != null) {
+            startRecordButton.setVisibility(View.GONE);
+            endRecordButton.setVisibility(View.GONE);
+        } else {
+            startRecordButton.setVisibility(View.VISIBLE);
+            endRecordButton.setVisibility(View.GONE);
+        }
+
+        startRecordButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recordStartLoc = locationUnderCursor();
+                Toast.makeText(MainActivity.this, R.string.start_walking, Toast.LENGTH_LONG).show();
+                startRecordButton.setVisibility(View.GONE);
+                endRecordButton.setVisibility(View.VISIBLE);
+            }
+        });
+
+        endRecordButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                recordStartLoc = null;
+                Toast.makeText(MainActivity.this, R.string.record_ended, Toast.LENGTH_LONG).show();
+                startRecordButton.setVisibility(View.VISIBLE);
+                endRecordButton.setVisibility(View.GONE);
+
+            }
+        });
 
         showLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override

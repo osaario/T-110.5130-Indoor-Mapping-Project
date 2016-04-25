@@ -52,12 +52,30 @@
                 android:id="@+id/selected_location_photos"
                 android:layout_height="wrap_content" />
         </LinearLayout>
-        <Button
-            android:id="@+id/button_show_location"
+        <LinearLayout
             android:layout_width="match_parent"
+            android:orientation="vertical"
             android:layout_weight="2"
-            android:layout_height="wrap_content"
-            android:text="@string/show"/>
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/button_show_location"
+                android:layout_width="match_parent"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:text="@string/show"/>
+            <Button
+                android:id="@+id/button_end_record"
+                android:layout_width="match_parent"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:text="@string/end_record"/>
+            <Button
+                android:id="@+id/button_start_record"
+                android:layout_width="match_parent"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:text="@string/start_record"/>
+        </LinearLayout>
         </LinearLayout>
     <TextView
         android:layout_width="match_parent"
