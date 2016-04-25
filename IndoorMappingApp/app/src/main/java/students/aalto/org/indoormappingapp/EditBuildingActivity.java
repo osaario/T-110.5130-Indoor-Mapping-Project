@@ -1,10 +1,14 @@
 package students.aalto.org.indoormappingapp;
 
+import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -81,6 +85,7 @@ public class EditBuildingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_building);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
 
         dataSet = ApplicationState.Instance().getSelectedDataSet();
         String title = "Edit " + dataSet.Name;
@@ -167,5 +172,7 @@ public class EditBuildingActivity extends AppCompatActivity {
             });
         }
     }
+
+
 
 }
