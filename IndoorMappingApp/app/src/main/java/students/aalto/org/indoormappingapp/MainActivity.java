@@ -2,6 +2,8 @@ package students.aalto.org.indoormappingapp;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -24,6 +26,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,6 +43,7 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.functions.Func3;
+import rx.schedulers.Schedulers;
 import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
@@ -48,13 +55,15 @@ import students.aalto.org.indoormappingapp.sensors.SensorsSnapshot;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 import students.aalto.org.indoormappingapp.tests.SensorsTestActivity;
 
-class TransitionAndZoom {
-    public TransitionAndZoom(float x,float y,float zoom) {
+class RenderState {
+    public RenderState(float x,float y,float zoom, Bitmap bitmap) {
         X = x;
         Y = y;
         Zoom = zoom;
+        BackgroundImage = bitmap;
     }
     public Float X;
+    public Bitmap BackgroundImage;
     public Float Y;
     public Float Zoom;
 }
@@ -66,6 +75,21 @@ public class MainActivity extends MenuRouterActivity {
     private Float translationY = 0f;
     private List<Location> photos;
 
+
+    public static Bitmap getBitmapFromURL(String src) {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            // Log exception
+            return null;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,32 +195,32 @@ public class MainActivity extends MenuRouterActivity {
         });
 
         // Create mock step from button.
-        Observable<Float> zoomObservable = Observable.create(new Observable.OnSubscribe<Integer>() {
+        Observable<Float> zoomObservable = Observable.create(new Observable.OnSubscribe<Float>() {
             @Override
-            public void call(final Subscriber<? super Integer> subscriber) {
+            public void call(final Subscriber<? super Float> subscriber) {
                 leftButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        subscriber.onNext(-1);
+                        subscriber.onNext(-1f);
                     }
                 });
 
                 rightButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        subscriber.onNext(1);
+                        subscriber.onNext(1f);
                     }
                 });
             }
-        }).scan(new Func2<Integer, Integer, Integer>() {
+        }).scan(new Func2<Float, Float, Float>() {
             @Override
-            public Integer call(Integer integer, Integer integer2) {
+            public Float call(Float integer, Float integer2) {
                 return integer + integer2;
             }
-        }).startWith(0).map(new Func1<Integer, Float>() {
+        }).startWith(0f).map(new Func1<Float, Float>() {
             @Override
-            public Float call(Integer integer) {
-                return 1.0f + ((float)integer * 0.1f);
+            public Float call(Float aFloat) {
+                return 1.0f + (aFloat * 0.1f);
             }
         });
 
@@ -218,7 +242,7 @@ public class MainActivity extends MenuRouterActivity {
                                 downY[0] = motionEvent.getY();
 
                             }
-                        } else if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                        } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                             downX[0] = null;
                             downY[0] = null;
                         }
@@ -234,15 +258,23 @@ public class MainActivity extends MenuRouterActivity {
                 //accumulate
                 return new Pair<Float, Float>(floatFloatPair.first + floatFloatPair2.first, floatFloatPair.second + floatFloatPair2.second);
             }
-        });
+        }).startWith(new Pair<Float, Float>(0f,0f));
 
-        Observable<TransitionAndZoom> transitionAndZoomObservable = Observable.combineLatest(zoomObservable, translationObservable, new Func2<Float, Pair<Float, Float>, TransitionAndZoom>() {
+        Observable<Bitmap> backgroundObs = Observable.just(1).observeOn(Schedulers.newThread()).map(new Func1<Integer, Bitmap>() {
             @Override
-            public TransitionAndZoom call(Float aFloat, Pair<Float, Float> floatFloatPair) {
-                TransitionAndZoom t = new TransitionAndZoom(floatFloatPair.first, floatFloatPair.second, aFloat);
+            public Bitmap call(Integer integer) {
+                Bitmap bmp = getBitmapFromURL(ApplicationState.Instance().getSelectedDataSet().MapPhoto.URL);
+                return bmp;
+            }
+        }).observeOn(AndroidSchedulers.mainThread());
+
+        Observable<RenderState> transitionAndZoomObservable = Observable.combineLatest(zoomObservable, translationObservable, backgroundObs, new Func3<Float, Pair<Float, Float>, Bitmap, RenderState>() {
+            @Override
+            public RenderState call(Float aFloat, Pair<Float, Float> floatFloatPair, Bitmap bitmap) {
+                RenderState t = new RenderState(floatFloatPair.first, floatFloatPair.second, aFloat, bitmap);
                 return t;
             }
-        }).startWith(new TransitionAndZoom(0f,0f,1f));
+        });
 
         dialog.show();
         Observable.combineLatest(NetworkService.getLocations(ApplicationState.Instance().getSelectedDataSet().ID).map(new Func1<List<Location>, List<Location>>() {
@@ -258,14 +290,14 @@ public class MainActivity extends MenuRouterActivity {
                 }
                 return filtered;
             }
-        }), transitionAndZoomObservable, new Func2<List<Location>, TransitionAndZoom, Pair<List<Location>, TransitionAndZoom>>() {
+        }), transitionAndZoomObservable, new Func2<List<Location>, RenderState, Pair<List<Location>, RenderState>>() {
             @Override
-            public Pair<List<Location>, TransitionAndZoom> call(List<Location> locations, TransitionAndZoom transitionAndZoom) {
-                return new Pair<List<Location>, TransitionAndZoom>(locations, transitionAndZoom);
+            public Pair<List<Location>, RenderState> call(List<Location> locations, RenderState transitionAndZoom) {
+                return new Pair<List<Location>, RenderState>(locations, transitionAndZoom);
             }
-        }).subscribe(new Action1<Pair<List<Location>, TransitionAndZoom>>() {
+        }).subscribe(new Action1<Pair<List<Location>, RenderState>>() {
             @Override
-            public void call(Pair<List<Location>, TransitionAndZoom> listTransitionAndZoomPair) {
+            public void call(Pair<List<Location>, RenderState> listTransitionAndZoomPair) {
                 if (mSurfaceHolder == null) return;
                 dialog.dismiss();
 
@@ -293,6 +325,7 @@ public class MainActivity extends MenuRouterActivity {
                 paintGreen.setStrokeWidth(10);
 
 
+
                 float scaleX = listTransitionAndZoomPair.second.Zoom;
                 float scaleY = listTransitionAndZoomPair.second.Zoom;
                 translationX = listTransitionAndZoomPair.second.X;
@@ -309,7 +342,10 @@ public class MainActivity extends MenuRouterActivity {
 
                 canvas.translate(((float) canvas.getWidth() - scaleX * (float) canvas.getWidth()) / 2.0f,
                         ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
-                canvas.scale(scaleX, scaleY);
+                canvas.scale(scaleX + 0.01f, scaleY + 0.01f);
+                if(listTransitionAndZoomPair.second.BackgroundImage != null) {
+                    canvas.drawBitmap(listTransitionAndZoomPair.second.BackgroundImage, -translationX,-translationY, null);
+                }
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
                 for (int i = 0; i < photos.size(); i++) {
                     Location start = photos.get(i);
