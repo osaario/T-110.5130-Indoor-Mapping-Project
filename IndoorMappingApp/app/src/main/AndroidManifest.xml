@@ -24,6 +24,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -85,6 +86,10 @@
             android:label="@string/title_activity_sensors_test"
             android:parentActivityName=".HomeActivity"
             android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".PhotoEditActivity"
+            android:label="@string/title_activity_photo_edit"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

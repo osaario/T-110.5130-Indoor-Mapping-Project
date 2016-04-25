@@ -86,8 +86,8 @@ public class NetworkService {
         return postOrPut("datasets/" + dataSetID + "/locations/" + locationID + "/photos", photo, false);
     }
 
-    public static Observable<Boolean> removePhoto(String dataSetID, String locationID, Photo photo) {
-        return delete("datasets/" + dataSetID + "/locations/" + locationID + "/photos/" + photo.ID);
+    public static Observable<Boolean> removePhoto(String dataSetID, String locationID, String photoID) {
+        return delete("datasets/" + dataSetID + "/locations/" + locationID + "/photos/" + photoID);
     }
 
     public static Observable<ImageDownload> getImage(Photo photo) {

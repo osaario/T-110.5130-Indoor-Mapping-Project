@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -94,6 +95,16 @@ public class PhotoListActivity extends AppCompatActivity {
         adapter = new PhotoListAdapter(this, R.layout.listitem);
         ListView list = (ListView) findViewById(R.id.listView_photoList);
         list.setAdapter(adapter);
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Photo photo = adapter.getItem(i);
+                Intent intent = new Intent(getApplicationContext(), PhotoEditActivity.class);
+                intent.putExtra("photoID",photo.ID);
+                startActivity(intent);
+            }
+        });
 
         dialog = new ProgressDialog(this);
         dialog.setIndeterminate(true);

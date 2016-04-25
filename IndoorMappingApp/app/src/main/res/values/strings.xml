@@ -41,4 +41,5 @@
     <string name="end_record">End path</string>
     <string name="record_ended">Path recording ended</string>
     <string name="start_walking">Path record started. Walk to destination.</string>
+    <string name="title_activity_photo_edit">Edit photo</string>
 </resources>
