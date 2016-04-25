@@ -31,7 +31,7 @@ import students.aalto.org.indoormappingapp.services.NetworkService;
 import students.aalto.org.indoormappingapp.tests.SensorsTestActivity;
 
 public class HomeActivity extends AppCompatActivity {
-    boolean editMode = false;
+
     List<DataSet> loadedDataset;
     private ProgressDialog dialog;
     private Subscription subscription;
@@ -60,23 +60,6 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        Button button= (Button) findViewById(R.id.buttonEdit);
-        //edit button
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                editMode = !editMode;
-                if (editMode){
-                    setTitle("Select building to modify!");
-                } else{
-                    setTitle("Indoor Mapping!");
-                }
-            }
-        });
-
-
     }
 
 
@@ -158,20 +141,12 @@ public class HomeActivity extends AppCompatActivity {
                 // Floor activity disabled temporarily
                 //Intent intent = new Intent(getBaseContext(), FloorActivity.class);
                 ApplicationState.Instance().setSelectedDataSet(loadedDataset.get(position));
-                if (!editMode) {
-                    //normal mode
-                    Intent intent = new Intent(getBaseContext(), LocationListActivity.class);
-                    intent.putExtra("building", buildingName);
-                    intent.putExtra("ID", buildingID);
-                    startActivity(intent);
-                } else{
-                    //edit mode
-                    Intent intent = new Intent(getBaseContext(), EditBuildingActivity.class);
-                    intent.putExtra("building", buildingName);
-                    intent.putExtra("ID", buildingID);
-                    startActivity(intent);
-                }
 
+                //normal mode
+                Intent intent = new Intent(getBaseContext(), LocationListActivity.class);
+                intent.putExtra("building", buildingName);
+                intent.putExtra("ID", buildingID);
+                startActivity(intent);
             }
         });
     }

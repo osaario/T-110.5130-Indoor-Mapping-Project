@@ -8,11 +8,12 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import rx.Observable;
@@ -34,54 +35,68 @@ public class EditBuildingActivity extends AppCompatActivity {
     DataSet dataSet;
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_building_edit, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        final Context context = this;
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_delete) {
+            Intent intent = new Intent(getBaseContext(), HomeActivity.class);
+            startActivity(intent);
+
+            progress.setVisibility(View.VISIBLE);
+            NetworkService.removeDataSet(dataSet.ID).subscribe(new Action1<Boolean>() {
+                @Override
+                public void call(Boolean aBoolean) {
+                    progress.setVisibility(View.GONE);
+                    finish();
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("dataset", throwable.toString());
+                    Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
+                    progress.setVisibility(View.GONE);
+                }
+            });
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_building);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        dataSet = ApplicationState.Instance().getSelectedDataSet();
+        String title = "Edit " + dataSet.Name;
+        setTitle(title);
+
         progress = (ProgressBar) findViewById(R.id.progressBar);
         cameraButton = (Button) findViewById(R.id.button_capturePhoto);
 
         progress.setVisibility(View.GONE);
 
-        //Intent intent = getIntent();
-        //id = intent.getStringExtra("ID");
-        //String building = intent.getStringExtra("building");
 
-        //TextView buildingNameTextView = (TextView)findViewById(R.id.Textview_buildingName);
-        //TextView buildingIDTextView = (TextView)findViewById(R.id.Textview_buildingID);
-        //buildingIDTextView.setText(id);
-        //buildingNameTextView.setText(building);
 
-        dataSet = ApplicationState.Instance().getSelectedDataSet();
         ((EditText) findViewById(R.id.editText_buildingName)).setText(dataSet.Name);
         ((EditText) findViewById(R.id.editText_buildingDesc)).setText(dataSet.Description);
 
         final Context context = this;
-        Button deleteButton = (Button) findViewById(R.id.button_dataset_remove);
-
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                progress.setVisibility(View.VISIBLE);
-                NetworkService.removeDataSet(dataSet.ID).subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean aBoolean) {
-                        progress.setVisibility(View.GONE);
-                        finish();
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("dataset", throwable.toString());
-                        Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
-                        progress.setVisibility(View.GONE);
-                    }
-                });
-            }
-        });
 
         final Button updateButton = (Button) findViewById(R.id.button_buildingUpdate);
         updateButton.setOnClickListener(new View.OnClickListener() {

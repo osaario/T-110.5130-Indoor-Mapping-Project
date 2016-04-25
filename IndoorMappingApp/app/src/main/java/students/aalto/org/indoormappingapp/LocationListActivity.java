@@ -22,6 +22,7 @@ import rx.Subscription;
 import rx.functions.Action1;
 import students.aalto.org.indoormappingapp.adapters.LocationListAdapter;
 import students.aalto.org.indoormappingapp.model.ApplicationState;
+import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 import students.aalto.org.indoormappingapp.tests.SensorsTestActivity;
@@ -30,6 +31,7 @@ public class LocationListActivity extends AppCompatActivity {
 
     private LocationListAdapter listAdapter;
     private Subscription loadSubscription;
+    DataSet dataSet;
 
     @Override
     protected void onDestroy() {
@@ -57,6 +59,14 @@ public class LocationListActivity extends AppCompatActivity {
             startActivity(intent);
             return true;
         }
+        if (id == R.id.action_edit) {
+            dataSet = ApplicationState.Instance().getSelectedDataSet();
+            Intent intent = new Intent(getBaseContext(), EditBuildingActivity.class);
+            intent.putExtra("building", dataSet.Name);
+            intent.putExtra("ID", dataSet.Description);
+            startActivity(intent);
+        }
+
 
         return super.onOptionsItemSelected(item);
     }
