@@ -400,7 +400,7 @@ public class MainActivity extends MenuRouterActivity {
                         tmpPaint = paintGreen;
                     }
 
-                    canvas.drawCircle(centerX + (float) start.X - translationX, centerY + (float) start.Y - translationY, 10, tmpPaint);
+                    canvas.drawCircle(centerX + (float) start.X - translationX, centerY + (float) start.Y - translationY, 10f / scaleX, tmpPaint);
                 }
 
                 Paint paint = new Paint();
