@@ -29,6 +29,7 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import students.aalto.org.indoormappingapp.adapters.PhotoListAdapter;
 import students.aalto.org.indoormappingapp.model.ApplicationState;
+import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.model.Photo;
 import students.aalto.org.indoormappingapp.services.ImageUpload;
@@ -39,6 +40,9 @@ public class PhotoListActivity extends AppCompatActivity {
     static final int REQUEST_TAKE_PHOTO = 1;
     static public String LOCATION_ID = "locationId";
     static public String DATASET_ID = "datasetId";
+
+    DataSet dataSet;
+    Location location;
 
     String datasetId;
     String locationId;
@@ -139,6 +143,34 @@ public class PhotoListActivity extends AppCompatActivity {
         if (id == R.id.action_pin_to_map) {
             Intent intent = new Intent(getBaseContext(), MainActivity.class);
             startActivity(intent);
+            return true;
+        }
+
+        if (id == R.id.action_delete) {
+            Intent intent = new Intent(getBaseContext(), LocationListActivity.class);
+            startActivity(intent);
+            //remove location
+            final Context context = this;
+            //progress.setVisibility(View.VISIBLE);
+            //String dataSetID, String locationID
+            dataSet = ApplicationState.Instance().getSelectedDataSet();
+            location = ApplicationState.Instance().getSelectedLocation();
+            NetworkService.removeLocation(dataSet.ID,location.ID).subscribe(new Action1<Boolean>() {
+                @Override
+                public void call(Boolean aBoolean) {
+                    //progress.setVisibility(View.GONE);
+                    finish();
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    Log.e("location", throwable.toString());
+                    Toast.makeText(context, context.getResources().getString(R.string.error_connection), Toast.LENGTH_SHORT).show();
+                    //progress.setVisibility(View.GONE);
+                }
+            });
+
+
             return true;
         }
 

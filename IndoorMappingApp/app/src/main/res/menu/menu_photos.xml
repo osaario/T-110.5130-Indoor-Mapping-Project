@@ -3,4 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".LocationListActivity">
     <item android:id="@+id/action_pin_to_map" android:title="@string/action_pin_to_map"
         android:orderInCategory="100" app:showAsAction="always" />
+    <item android:id="@+id/action_delete" android:title="@string/action_delete"
+        android:orderInCategory="100" app:showAsAction="never" />
+
 </menu>
