@@ -386,7 +386,7 @@ public class MainActivity extends MenuRouterActivity {
                         ((float) canvas.getHeight() - scaleY * (float) canvas.getHeight()) / 2.0f);
                 canvas.scale(scaleX + 0.01f, scaleY + 0.01f);
                 if (listTransitionAndZoomPair.second.BackgroundImage != null) {
-                    canvas.drawBitmap(listTransitionAndZoomPair.second.BackgroundImage, -translationX, -translationY, null);
+                    canvas.drawBitmap(listTransitionAndZoomPair.second.BackgroundImage, centerX - translationX - (listTransitionAndZoomPair.second.BackgroundImage.getWidth() / 2), centerY - translationY - (listTransitionAndZoomPair.second.BackgroundImage.getHeight() / 2), null);
                 }
                 //location = DeadReckoning.calculatePositionDelta(location.first, location.second, 100, null);
                 for (int i = 0; i < photos.size(); i++) {
