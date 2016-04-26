@@ -16,28 +16,29 @@ import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
 public class Photo extends NetworkJSONObject {
     public String ID;
     public Date Created;
-    public double XR;
-    public double YR;
-    public double ZR;
     public String Description;
     public String URL;
     public String ThumbURL;
-    public File FilePath;
 
-    public Photo(double xr, double yr, double zr, String description) {
+    public File FilePath;
+    public Sensor Sensor;
+
+    public Photo(String description, Sensor sensor) {
         ID = null;
         Created = new Date();
-        XR = xr;
-        YR = yr;
-        ZR = zr;
         Description = description;
         URL = null;
         ThumbURL = null;
         FilePath = null;
+        Sensor = sensor;
+    }
+
+    public Photo(String description) {
+        this(description, null);
     }
 
     public Photo() {
-        this(0, 0, 0, "");
+        this("");
     }
 
     public Boolean hasImage() {
@@ -48,10 +49,10 @@ public class Photo extends NetworkJSONObject {
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("created", toJSONDate(Created));
-        json.put("xRotation", XR);
-        json.put("yRotation", YR);
-        json.put("zRotation", ZR);
         json.put("description", Description);
+        if (Sensor != null) {
+            json.put("sensor", Sensor.toJSON());
+        }
         return json;
     }
 
@@ -64,9 +65,6 @@ public class Photo extends NetworkJSONObject {
     public void parseJSON(JSONObject json) throws JSONException {
         ID = json.getString("_id");
         Created = parseJSONDate(json.getString("created"));
-        XR = json.getDouble("xRotation");
-        YR = json.getDouble("yRotation");
-        ZR = json.getDouble("zRotation");
         Description = json.getString("description");
         String url = json.optString("image");
         if (url != null) {

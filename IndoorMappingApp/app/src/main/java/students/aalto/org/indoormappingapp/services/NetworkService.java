@@ -20,7 +20,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
-import students.aalto.org.indoormappingapp.model.Path;
+import students.aalto.org.indoormappingapp.model.Sensor;
 import students.aalto.org.indoormappingapp.model.Photo;
 
 /**
@@ -30,6 +30,7 @@ import students.aalto.org.indoormappingapp.model.Photo;
 public class NetworkService {
 
     final static String SERVICE_URL = "https://indoor-mapping-app-server.herokuapp.com/api/";
+
     final static int SERVICE_POOL_SIZE = 3;
 
     enum Method {GET, POST, PUT, DELETE};
@@ -64,17 +65,6 @@ public class NetworkService {
         return delete("datasets/" + dataSetID + "/locations/" + locationID);
     }
 
-    public static Observable<Path> savePath(String dataSetID, Path path) {
-        if (path.ID != null) {
-            return postOrPut("datasets/" + dataSetID + "/paths/" + path.ID, path, true);
-        }
-        return postOrPut("datasets/" + dataSetID + "/paths", path, false);
-    }
-
-    public static Observable<Boolean> removePath(String dataSetID, String pathID) {
-        return delete("datasets/" + dataSetID + "/paths/" + pathID);
-    }
-
     public static Observable<List<Photo>> getPhotos(String dataSetID, String locationID) {
         return get("datasets/" + dataSetID + "/locations/" + locationID + "/photos", new Photo());
     }
@@ -88,6 +78,14 @@ public class NetworkService {
 
     public static Observable<Boolean> removePhoto(String dataSetID, String locationID, String photoID) {
         return delete("datasets/" + dataSetID + "/locations/" + locationID + "/photos/" + photoID);
+    }
+
+    public static Observable<Sensor> savePath(String dataSetID, Sensor path) {
+        return postOrPut("datasets/" + dataSetID + "/locations/" + path.ToLocationID + "/paths", path, false);
+    }
+
+    public static Observable<Boolean> removePath(String dataSetID, String locationID, String pathID) {
+        return delete("datasets/" + dataSetID + "/locations/" + locationID + "/paths/" + pathID);
     }
 
     public static Observable<ImageDownload> getImage(Photo photo) {

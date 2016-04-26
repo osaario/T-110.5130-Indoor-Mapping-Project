@@ -11,7 +11,8 @@ module.exports = function() {
 	require('../app/models/DataSets');
 	require('../app/models/Locations');
 	require('../app/models/Photos');
-	require('../app/models/Paths');
+	require('../app/models/Files');
+	require('../app/models/Sensors');
 
 	return db;
 };

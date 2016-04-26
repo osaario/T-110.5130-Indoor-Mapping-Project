@@ -7,7 +7,7 @@ var config = require('./config'),
 	compress = require('compression'),
 	bodyParser = require('body-parser'),
 	busboy = require('connect-busboy'),
-	general = require('../app/controllers/general');
+	helpers = require('../app/models/helpers');
 
 module.exports = function() {
 
@@ -24,7 +24,7 @@ module.exports = function() {
 	require('../app/routes/index.routes.js')(app);
 	require('../app/routes/dataSets.routes.js')(app);
 
-	app.use(general.error);
+	app.use(helpers.error);
 
 	app.use(express.static('./public'));
 

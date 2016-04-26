@@ -11,26 +11,26 @@ import java.util.List;
 import students.aalto.org.indoormappingapp.sensors.SensorsSnapshot;
 import students.aalto.org.indoormappingapp.services.NetworkJSONObject;
 
-public class Path extends NetworkJSONObject {
+public class Sensor extends NetworkJSONObject {
     public String ID;
     public Date Created;
     public String FromLocationID;
     public String ToLocationID;
     public List<SensorsSnapshot> path;
 
-    public Path(List<SensorsSnapshot> path, Location to) {
+    public Sensor(List<SensorsSnapshot> path, Location to) {
         this(path, null, to);
     }
 
-    public Path(List<SensorsSnapshot> path, Location from, Location to) {
+    public Sensor(List<SensorsSnapshot> path, Location from, Location to) {
         ID = null;
         Created = new Date();
         FromLocationID = from != null ? from.ID : null;
         ToLocationID = to != null ? to.ID : null;
-        path = path;
+        this.path = path;
     }
 
-    public Path() {
+    public Sensor() {
         this(new ArrayList<SensorsSnapshot>(), null, null);
     }
 
@@ -38,8 +38,7 @@ public class Path extends NetworkJSONObject {
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("created", toJSONDate(Created));
-        json.put("fromLocation", FromLocationID);
-        json.put("toLocation", ToLocationID);
+        json.put("from", FromLocationID);
 
         JSONArray timestamp = new JSONArray(),
                 xOrientation = new JSONArray(), yOrientation = new JSONArray(), zOrientation = new JSONArray(),
@@ -87,15 +86,14 @@ public class Path extends NetworkJSONObject {
 
     @Override
     public NetworkJSONObject empty() {
-        return new Path();
+        return new Sensor();
     }
 
     @Override
     public void parseJSON(JSONObject json) throws JSONException {
         ID = json.getString("_id");
         Created = parseJSONDate(json.getString("created"));
-        FromLocationID = json.optString("fromLocation");
-        ToLocationID = json.optString("toLocation");
+        FromLocationID = json.optString("from");
 
         JSONArray timestamp = json.getJSONArray("timestamp");
         //JSONArray xOrientation = json.getJSONArray("xOrientation");

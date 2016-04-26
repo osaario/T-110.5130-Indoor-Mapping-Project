@@ -99,7 +99,7 @@ public class ServiceTestActivity extends AppCompatActivity {
                     }
                 }
                 textView.append("Adding test location.\n");
-                Location l = new Location(0, 0, 0, "Origo");
+                Location l = new Location(0, 0, 0, "Origo", "");
                 return NetworkService.saveLocation(selectedDataSet.ID, l);
 
             }
@@ -139,7 +139,7 @@ public class ServiceTestActivity extends AppCompatActivity {
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            capturedPhoto = new Photo(0, 0, 0, "");
+            capturedPhoto = new Photo("");
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(capturedPhoto.FilePath));
             startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
         }

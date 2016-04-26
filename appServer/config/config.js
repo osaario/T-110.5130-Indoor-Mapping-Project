@@ -4,7 +4,8 @@
 var config = {
 	env: 'development',
 	db: 'mongodb://localhost/indoormapping',
-	url: 'http://localhost:3000/',
+	//url: 'http://localhost:3000/',
+	url: 'http://192.168.0.10:3000/',
 };
 
 if (process.env.MONGOLAB_URI !== undefined) {

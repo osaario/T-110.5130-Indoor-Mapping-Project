@@ -7,16 +7,22 @@ var NotFound = exports.NotFound = function() {
 	return err;
 };
 
-exports.onSuccess = function(next, success) {
+exports.onSuccess = function(next, success, other) {
 	return function(err, doc) {
 		if (err) return next(err);
 		if (!doc) return next(new NotFound());
 		if (typeof(success.json) === 'function') {
-			success.json(doc);
+			success.json(other || doc);
 		} else {
-			success(doc);
+			success(other || doc);
 		}
 	};
+};
+
+exports.onSuccessRemove = function(next, res, other) {
+	return exports.onSuccess(next, function(doc) {
+		doc.remove(exports.onSuccess(next, res));
+	}, other);
 };
 
 exports.error = function(err, req, res, next) {

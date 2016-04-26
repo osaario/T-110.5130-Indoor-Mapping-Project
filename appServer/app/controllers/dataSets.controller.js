@@ -5,180 +5,159 @@ var mongoose = require('mongoose'),
 	DataSet = mongoose.model('DataSet'),
 	PhotoLocation = mongoose.model('Location'),
 	Photo = mongoose.model('Photo'),
-	Path = mongoose.model('Path'),
-	G = require('./general'),
+	File = mongoose.model('File'),
+	Sensor = mongoose.model('Sensor'),
+	H = require('../models/helpers'),
 	lwip = require('lwip');
 
 var extend = require('util')._extend;
 
 exports.list = function(req, res, next) {
-	DataSet.find().populate('mapPhoto').exec(G.onSuccess(next, res));
+	DataSet.find().populate('mapPhoto').exec(H.onSuccess(next, res));
 };
 
 exports.create = function(req, res, next) {
-	Photo.create({}, G.onSuccess(next, function(photo) {
-		var doc = extend({}, req.body);
-		doc.mapPhoto = photo._id;
-		DataSet.create(doc, G.onSuccess(next, function(dataSet) {
-			photo.datasetId = dataSet._id;
-			photo.save(G.onSuccess(next, function(doc) {
-				res.json(dataSet);
-			}));
-		}));
-	}));
+	DataSet.create(req.body, H.onSuccess(next, res));
 };
 
 exports.update = function(req, res, next) {
-	DataSet.findByIdAndUpdate(
-		req.params.datasetId,
-		req.body,
-		G.onSuccess(next, res)
-	);
+	DataSet.findByIdAndUpdate(req.params.datasetId, req.body, H.onSuccess(next, res));
 };
 
 exports.delete = function(req, res, next) {
-	Photo.remove({dataSet:req.params.datasetId}, function(err, n) {
-		PhotoLocation.remove({dataSet:req.params.datasetId}, function(err, n) {
-			Path.remove({dataSet:req.params.datasetId}, function(err, n) {
-				DataSet.findByIdAndRemove(req.params.datasetId, G.onSuccess(next, res));
-			});
-		});
-	});
+	// Must use model.remove() to trigger middlewares.
+	DataSet.findById(req.params.datasetId, H.onSuccessRemove(next, res));
 };
 
 exports.listLocations = function(req, res, next) {
-	PhotoLocation.find({dataSet:req.params.datasetId}).populate('photos paths').exec(G.onSuccess(next, res));
+	DataSet.findById(req.params.datasetId, H.onSuccess(next, function(dataSet) {
+		PhotoLocation.find({'_id':{$in:dataSet.locations}})
+			.populate('photos paths').exec(H.onSuccess(next, res));
+	}));
 };
 
 exports.createLocation = function(req, res, next) {
-	DataSet.findById(req.params.datasetId, G.onSuccess(next, function(dataSet) {
-		var doc = extend({}, req.body);
-		doc.dataSet = dataSet._id;
-		PhotoLocation.find({dataSet:dataSet._id})
-			.sort({$natural:-1}).limit(1)
-			.exec(function(err, locations) {
-				if (locations.length > 0) doc.previousLocation = locations[0]._id;
-				PhotoLocation.create(doc, G.onSuccess(next, res));
-			});
+	DataSet.findById(req.params.datasetId, H.onSuccess(next, function(dataSet) {
+		PhotoLocation.create(req.body, H.onSuccess(next, function(location) {
+			dataSet.locations.push(location._id);
+			dataSet.save(H.onSuccess(next, res, location));
+		}));
 	}));
 };
 
 exports.updateLocation = function(req, res, next) {
-	PhotoLocation.findOneAndUpdate(
-		{_id:req.params.locationId, dataSet:req.params.datasetId},
-		req.body,
-		G.onSuccess(next, res)
-	);
+	PhotoLocation.findByIdAndUpdate(req.params.locationId, req.body, H.onSuccess(next, res));
 };
 
 exports.deleteLocation = function(req, res, next) {
-	Photo.remove({location:req.params.locationId}, function(err, docs) {
-		PhotoLocation.findOneAndRemove(
-			{_id:req.params.locationId, dataSet:req.params.datasetId},
-			G.onSuccess(next, res)
-		);
-	});
-};
-
-exports.listPaths = function(req, res, next) {
-	Path.find({dataSet:req.params.datasetId}).exec(G.onSuccess(next, res));
-};
-
-exports.createPath = function(req, res, next) {
-	DataSet.findById(req.params.datasetId, G.onSuccess(next, function(dataSet) {
-		var doc = extend({}, req.body);
-		doc.dataSet = dataSet._id;
-		Path.create(doc, G.onSuccess(next, function(path) {
-			if (path.toLocation) {
-				PhotoLocation.findOne({_id:path.toLocation, dataSet:req.params.datasetId}, G.onSuccess(next, function(location) {
-					location.paths.push(path._id);
-					location.save(G.onSuccess(next, function(doc) {
-						res.json(path);
-					}));
-				}));
-			} else {
-				res.json(path);
-			}
+	DataSet.findById(req.params.datasetId, H.onSuccess(next, function(dataSet) {
+		PhotoLocation.findById(req.params.locationId, H.onSuccess(next, function(location) {
+			dataSet.locations.remove(location._id);
+			dataSet.save(H.onSuccessRemove(next, res, location));
 		}));
 	}));
 };
 
-exports.deletePath = function(req, res, next) {
-	Path.findOneAndRemove(
-		{_id:req.params.pathId, dataSet:req.params.datasetId},
-		G.onSuccess(next, res)
-	);
-};
-
 exports.listPhotos = function(req, res, next) {
-	Photo.find({location:req.params.locationId}).exec(G.onSuccess(next, res));
+	PhotoLocation.findById(req.params.locationId, H.onSuccess(next, function(location) {
+		Photo.find({'_id':{$in:location.photos}}).exec(H.onSuccess(next, res));
+	}));
 };
 
 exports.createPhoto = function(req, res, next) {
-	DataSet.findById(req.params.datasetId, G.onSuccess(next, function(dataSet) {
-		PhotoLocation.findById(req.params.locationId, G.onSuccess(next, function(location) {
-			var doc = extend({}, req.body);
-			doc.location = location._id;
-			doc.dataSet = dataSet._id;
-			Photo.create(doc, G.onSuccess(next, function(photo) {
-				location.photos.push(photo._id);
-				location.save(G.onSuccess(next, function(doc) {
+	PhotoLocation.findById(req.params.locationId, H.onSuccess(next, function(location) {
+		Photo.create(req.body, H.onSuccess(next, function(photo) {
+			location.photos.push(photo._id);
+			location.save(H.onSuccess(next, function(location) {
+
+				if (req.body.sensor !== undefined) {
+					Sensor.create(req.body.sensor, H.onSuccess(next, function(sensor) {
+						photo.sensor = sensor._id;
+						photo.save(H.onSuccess(next, res, photo));
+					}));
+				} else {
 					res.json(photo);
-				}));
+				}
 			}));
 		}));
 	}));
 };
 
 exports.updatePhoto = function(req, res, next) {
-	Photo.findOneAndUpdate(
-		{_id:req.params.photoId, location:req.params.locationId},
-		req.body,
-		G.onSuccess(next, res)
-	);
+	Photo.findByIdAndUpdate(req.params.photoId, req.body, H.onSuccess(next, res));
 };
 
 exports.deletePhoto = function(req, res, next) {
-	Photo.findOneAndRemove(
-		{_id:req.params.photoId, location:req.params.locationId},
-		G.onSuccess(next, res)
-	);
+	PhotoLocation.findById(req.params.locationId, H.onSuccess(next, function(location) {
+		Photo.findById(req.params.photoId, H.onSuccess(next, function(photo) {
+			location.photos.remove(photo._id);
+			location.save(H.onSuccessRemove(next, res, photo));
+		}));
+	}));
+};
+
+exports.listPaths = function(req, res, next) {
+	PhotoLocation.findById(req.params.locationId, H.onSuccess(next, function(location) {
+		Sensor.find({'_id':{$in:location.paths}}).exec(H.onSuccess(next, res));
+	}));
+};
+
+exports.createPath = function(req, res, next) {
+	PhotoLocation.findById(req.params.locationId, H.onSuccess(next, function(location) {
+		Sensor.create(req.body, H.onSuccess(next, function(sensor) {
+			location.paths.push(sensor._id);
+			location.save(H.onSuccess(next, res, location));
+		}));
+	}));
+};
+
+exports.deletePath = function(req, res, next) {
+	PhotoLocation.findById(req.params.locationId, H.onSuccess(next, function(location) {
+		Sensor.findById(req.params.pathId, H.onSuccess(next, function(path) {
+			location.paths.remove(path._id);
+			location.save(H.onSuccessRemove(next, res, path));
+		}));
+	}));
 };
 
 exports.getImage = function(req, res, next) {
-	Photo.findById(req.params.photoId).exec(G.onSuccess(next, function(photo) {
-		if (photo.image.data !== undefined) {
-			res.contentType(photo.image.contentType).send(photo.image.data);
+	Photo.findById(req.params.photoId).exec(H.onSuccess(next, function(photo) {
+		if (photo.file !== undefined) {
+			File.findById(photo.file).exec(H.onSuccess(next, function(file) {
+				res.contentType(file.contentType).send(file.data);
+			}));
 		} else {
-			res.status(404).json({'error':'Missing image'});
+			res.status(404).json({'error':'Missing photo file'});
 		}
 	}));
 };
 
 exports.getImageScaled = function(req, res, next) {
-	Photo.findById(req.params.photoId).exec(G.onSuccess(next, function(photo) {
-		if (photo.image.data !== undefined) {
-			lwip.open(photo.image.data, 'jpg', G.onSuccess(next, function(image) {
-				var cb = G.onSuccess(next, function(image) {
-					image.toBuffer('jpg', G.onSuccess(next, function(buffer) {
-						res.contentType('image/jpeg').send(buffer);
-					}));
-				});
-				if (req.params.size == 'tiny') {
-					image.cover(200, 200, cb);
-				} else {
-					var ratio = Math.min(1, 1920 / image.width(), 1920 / image.height());
-					image.scale(ratio, cb);
-				}
+	Photo.findById(req.params.photoId).exec(H.onSuccess(next, function(photo) {
+		if (photo.file !== undefined) {
+			File.findById(photo.file).exec(H.onSuccess(next, function(file) {
+				lwip.open(file.data, 'jpg', H.onSuccess(next, function(image) {
+					var cb = H.onSuccess(next, function(image) {
+						image.toBuffer('jpg', H.onSuccess(next, function(buffer) {
+							res.contentType('image/jpeg').send(buffer);
+						}));
+					});
+					if (req.params.size == 'tiny') {
+						image.cover(200, 200, cb);
+					} else {
+						var ratio = Math.min(1, 1920 / image.width(), 1920 / image.height());
+						image.scale(ratio, cb);
+					}
+				}));
 			}));
 		} else {
-			res.status(404).json({'error':'Missing image'});
+			res.status(404).json({'error':'Missing photo file'});
 		}
 	}));
 };
 
 exports.uploadImage = function(req, res, next) {
-	Photo.findById(req.params.photoId).exec(G.onSuccess(next, function(photo) {
+	Photo.findById(req.params.photoId).exec(H.onSuccess(next, function(photo) {
 		req.busboy.on('file', function(fieldname, file, filename, encoding, contentType) {
 			var size = 0;
 			file.fileRead = [];
@@ -187,10 +166,13 @@ exports.uploadImage = function(req, res, next) {
 				file.fileRead.push(chunk);
 			});
 			file.on('end', function() {
-				photo.image.contentType = contentType;
-				photo.image.data = Buffer.concat(file.fileRead, size);
-				photo.save(G.onSuccess(next, function(photo) {
-					res.json({'upload':'Complete'});
+				var image = new File({
+					contentType: contentType,
+					data: Buffer.concat(file.fileRead, size)
+				});
+				image.save(H.onSuccess(next, function(doc) {
+					photo.file = doc._id;
+					photo.save(H.onSuccess(next, res));
 				}));
 			});
 		});
@@ -199,11 +181,7 @@ exports.uploadImage = function(req, res, next) {
 };
 
 exports.details = function(req, res, next) {
-	DataSet.findOne({_id:req.params.datasetId}).populate('mapPhoto').exec(G.onSuccess(next, function(dataset) {
-		var out = dataset.toJSON();
-		PhotoLocation.find({dataSet:dataset._id}).populate('photos paths').exec(G.onSuccess(next, function(locations) {
-			out.locations = locations;
-			res.json(out);
-		}));
-	}));
+	DataSet.findOne({_id:req.params.datasetId})
+		.populate('mapPhoto locations')
+		.exec(H.onSuccess(next, res));
 };
