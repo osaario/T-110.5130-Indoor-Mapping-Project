@@ -42,29 +42,22 @@ Currently there is no active market for indoor navigation applications. This pro
 
 Android application collects the necessary information, including captured images and estimated locations, for use in the indoor mapping system. The mentioned information is gathered from the Android sensors and it is sent to back-end web service for later exporting. The web service is a data oriented restful HTTP service API. The application allows user to calibrate the estimated locations and assists the user to cover the area completely and accurately.
 
-### Requirements
+### Installation
 
-The application has following primary functional requirements
+The Android application in `IndoorMappingApp` is an Android Studio project. The Gradle build is targeting SDK 23 and has minimum SDK 16. The application has dependencies to RXJava, OKHTTP and Picasso.
 
-* User can take and store photos.
-* Application determines (with the use of coordinate system) user’s walking trace.
-* Application visualizes the walking trace including location and direction of photos as a map.
-* All collected data is send to backend service which stores it in database.
-* Back-end service exports selected data set for iMoon system which generates navigation mesh from it.
+The HTTP API service in 'appServer' is a NodeJS application that uses Mongo database. Following presents commands to run the service. 
 
-The following functional requirements are considered after MVP in priority order
+	$ apt-get install mongodb nodejs npm
+	$ git clone https://github.com/osaario/T-110.5130-Indoor-Mapping-Project
+	$ cd T-110.5130-Indoor-Mapping-Project/appServer
+	$ npm install
+	$ node server.js
 
-* User can calibrate and modify (e.g. by touching) walking trace locations and directions.
-* User can add clarifying text descriptions to map and/or photos.
-* User can load previously collected data set and append new data.
-* User can add clarifying line drawings to map.
-* Application collects Wi-Fi fingerprints, barometer, and magnetic field data along walking trace automatically.
-* Back-end service controls access to existing data sets by device.
-* User can share data sets using e.g. email for other devices.
-* User can view and modify data sets in the web service.
+An example of using pm2 to create daemon process.
 
-The non-functional requirements are
+	$ npm install -g pm2
+	$ pm2 start server.js
 
-* Good usability and user experience
-* Reliability of the application and backend service
-* Data integrity
+On older Ubuntu systems, the npm install of lwip has error. The lwip is used to scale smaller versions of images to be displayed in mobile application.
+
