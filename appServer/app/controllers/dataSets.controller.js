@@ -183,5 +183,7 @@ exports.uploadImage = function(req, res, next) {
 exports.details = function(req, res, next) {
 	DataSet.findOne({_id:req.params.datasetId})
 		.populate('mapPhoto locations')
-		.exec(H.onSuccess(next, res));
+		.exec(H.onSuccess(next, function(dataSet) {
+			PhotoLocation.populate(dataSet.locations, 'photos paths', H.onSuccess(next, res, dataSet));
+		}));
 };
