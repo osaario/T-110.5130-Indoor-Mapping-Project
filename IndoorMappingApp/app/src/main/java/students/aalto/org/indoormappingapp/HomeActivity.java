@@ -78,11 +78,11 @@ public class HomeActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_test) {
+        /*if (id == R.id.action_test) {
             Intent intent = new Intent(getBaseContext(), SensorsTestActivity.class);
             startActivity(intent);
             return true;
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }

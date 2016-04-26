@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -12,12 +13,11 @@ import java.util.List;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import students.aalto.org.indoormappingapp.MenuRouterActivity;
 import students.aalto.org.indoormappingapp.R;
 import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 import students.aalto.org.indoormappingapp.sensors.SensorsSnapshot;
 
-public class SensorsTestActivity extends MenuRouterActivity {
+public class SensorsTestActivity extends AppCompatActivity {
 
     SurfaceHolder mSurfaceHolder;
     SensorsFragment sensors;

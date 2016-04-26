@@ -7,14 +7,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.Pair;
-import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -25,16 +21,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -46,15 +38,8 @@ import rx.functions.Func2;
 import rx.functions.Func3;
 import rx.schedulers.Schedulers;
 import students.aalto.org.indoormappingapp.model.ApplicationState;
-import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
-import students.aalto.org.indoormappingapp.model.MapPosition;
-import students.aalto.org.indoormappingapp.model.Photo;
-import students.aalto.org.indoormappingapp.model.RenderData;
-import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
-import students.aalto.org.indoormappingapp.sensors.SensorsSnapshot;
 import students.aalto.org.indoormappingapp.services.NetworkService;
-import students.aalto.org.indoormappingapp.tests.SensorsTestActivity;
 
 class RenderState {
     public RenderState(float x,float y,float zoom, Bitmap bitmap) {
@@ -69,7 +54,7 @@ class RenderState {
     public Float Zoom;
 }
 
-public class MainActivity extends MenuRouterActivity {
+public class MainActivity extends AppCompatActivity {
 
     SurfaceHolder mSurfaceHolder;
     private Float translationX = 0f;
