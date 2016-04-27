@@ -51,7 +51,7 @@ public class Photo extends NetworkJSONObject {
         json.put("created", toJSONDate(Created));
         json.put("description", Description);
         if (Sensor != null) {
-            json.put("sensor", Sensor.toJSON());
+            json.put("sensorobject", Sensor.toJSON());
         }
         return json;
     }

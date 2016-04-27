@@ -70,8 +70,8 @@ exports.createPhoto = function(req, res, next) {
 			location.photos.push(photo._id);
 			location.save(H.onSuccess(next, function(location) {
 
-				if (req.body.sensor !== undefined) {
-					Sensor.create(req.body.sensor, H.onSuccess(next, function(sensor) {
+				if (req.body.sensorobject !== undefined) {
+					Sensor.create(req.body.sensorobject, H.onSuccess(next, function(sensor) {
 						photo.sensor = sensor._id;
 						photo.save(H.onSuccess(next, res, photo));
 					}));
@@ -184,6 +184,8 @@ exports.details = function(req, res, next) {
 	DataSet.findOne({_id:req.params.datasetId})
 		.populate('mapPhoto locations')
 		.exec(H.onSuccess(next, function(dataSet) {
-			PhotoLocation.populate(dataSet.locations, 'photos paths', H.onSuccess(next, res, dataSet));
+			PhotoLocation.populate(dataSet.locations, 'photos paths', H.onSuccess(next, function(locations) {
+				Sensor.populate(dataSet.locations, 'photos.sensor', H.onSuccess(next, res, dataSet));
+			}));
 		}));
 };

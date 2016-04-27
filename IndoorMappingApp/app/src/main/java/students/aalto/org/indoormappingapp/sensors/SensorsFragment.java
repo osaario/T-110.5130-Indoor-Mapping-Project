@@ -67,6 +67,10 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         super.onDestroyView();
     }
 
+    public void configureCache(int size, boolean noCycling) {
+        cache = new SensorsCache(size, noCycling);
+    }
+
     public void startRecording(boolean publishOrientation) {
         startRecording(publishOrientation, new float[] {0,0,0});
     }
@@ -164,6 +168,7 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
     }
 
     private void step(SensorsSnapshot readings) {
+        /*
         if (readings == null) {
             Log.e("sensors", "Sensor readings missing for step");
             return;
@@ -178,6 +183,7 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
                 before.Coordinate[2]
         };
         path.add(readings);
+        */
     }
 
 }
