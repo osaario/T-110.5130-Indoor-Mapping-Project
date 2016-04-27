@@ -168,6 +168,7 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
     }
 
     private void step(SensorsSnapshot readings) {
+        /*
         if (readings == null) {
             Log.e("sensors", "Sensor readings missing for step");
             return;
@@ -182,6 +183,7 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
                 before.Coordinate[2]
         };
         path.add(readings);
+        */
     }
 
 }

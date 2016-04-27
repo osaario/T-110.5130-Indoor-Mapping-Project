@@ -28,6 +28,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.subjects.BehaviorSubject;
 import students.aalto.org.indoormappingapp.adapters.PhotoListAdapter;
 import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.DataSet;
@@ -58,6 +59,7 @@ public class PhotoListActivity extends AppCompatActivity {
     PhotoListAdapter adapter;
     private Subscription subscription;
     private ProgressDialog dialog;
+    private BehaviorSubject<Integer> photoTrigger = BehaviorSubject.create();
 
     SensorsFragment sensors;
 
@@ -107,7 +109,7 @@ public class PhotoListActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Photo photo = adapter.getItem(i);
                 Intent intent = new Intent(getApplicationContext(), PhotoEditActivity.class);
-                intent.putExtra("photoID",photo.ID);
+                intent.putExtra("photoID", photo.ID);
                 startActivity(intent);
             }
         });
@@ -116,9 +118,13 @@ public class PhotoListActivity extends AppCompatActivity {
         dialog.setIndeterminate(true);
         dialog.setCancelable(false);
         dialog.setMessage(getString(R.string.loading));
-
         dialog.show();
-        subscription = NetworkService.getPhotos(datasetId, locationId).subscribe(new Action1<List<Photo>>() {
+        subscription = photoTrigger.startWith(0).switchMap(new Func1<Integer, Observable<List<Photo>>>() {
+            @Override
+            public Observable<List<Photo>> call(Integer integer) {
+                return NetworkService.getPhotos(datasetId, locationId);
+            }
+        }).subscribe(new Action1<List<Photo>>() {
 
             @Override
             public void call(List<Photo> photos) {
@@ -224,7 +230,8 @@ public class PhotoListActivity extends AppCompatActivity {
                 @Override
                 public void call(ImageUpload imageUpload) {
                     dialog.dismiss();
-                    adapter.add(capturedPhoto);
+                    //adapter.add(capturedPhoto);
+                    photoTrigger.onNext(0);
                     button.setEnabled(true);
                 }
             }, new Action1<Throwable>() {
