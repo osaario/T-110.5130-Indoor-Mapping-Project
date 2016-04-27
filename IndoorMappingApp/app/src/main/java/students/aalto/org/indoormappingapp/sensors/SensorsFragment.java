@@ -25,10 +25,12 @@ import students.aalto.org.indoormappingapp.R;
 public class SensorsFragment extends Fragment implements SensorEventListener {
 
     public Observable<SensorsSnapshot> orientationObservable;
+    public SensorsCache cache = new SensorsCache(100);
     public List<SensorsSnapshot> path = new ArrayList<>(50);
 
     private PublishSubject<SensorsSnapshot> orientationSubject = PublishSubject.create();
 
+    boolean publishOrientation = false;
     boolean useAndroidStepSensor = true;
     float stepLength = 1.0f;
 
@@ -48,18 +50,35 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         return new SensorsFragment();
     }
 
-    public void startFrom(float[] coordinates) {
-        path.clear();
-        path.add(SensorsSnapshot.initial(coordinates));
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        orientationObservable = orientationSubject.replay().refCount();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_sensors, container, false);
+    }
+
+    @Override
+    public void onDestroyView() {
+        stopRecording();
+        super.onDestroyView();
+    }
+
+    public void startRecording(boolean publishOrientation) {
+        startRecording(publishOrientation, new float[] {0,0,0});
+    }
+
+    public void startRecording(boolean publishOrientation, float[] currentCoordinates) {
+
+        // TODO get useAndroidStepSensor and stepLengh from application settings
+        this.publishOrientation = publishOrientation;
+
+        cache.clear();
+        path.clear();
+        path.add(SensorsSnapshot.initial(currentCoordinates));
 
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
@@ -78,25 +97,14 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         } else {
             customStepDetector = new CustomStepDetector();
         }
-
-        orientationObservable = orientationSubject.replay().refCount();
-
-        return inflater.inflate(R.layout.fragment_sensors, container, false);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // TODO Get useAndroidStepSensor and stepLength from settings (singleton)
+    public void stopRecording() {
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+        }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        sensorManager.unregisterListener(this);
-    }
-
-    SensorsCache cache = new SensorsCache(100);
     float[] gyroscope = null;
     float[] magnetic = null;
     float[] accelerometer = null;
@@ -110,7 +118,9 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
             readings.Gyroscope = gyroscope;
             readings.Magnetic = magnetic;
             readings.Accelerometer = accelerometer;
-            orientationSubject.onNext(readings);
+            if (publishOrientation) {
+                orientationSubject.onNext(readings);
+            }
             cache.add(readings);
 
         } else if (type == Sensor.TYPE_GYROSCOPE) {

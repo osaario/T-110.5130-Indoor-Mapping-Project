@@ -54,7 +54,6 @@ public class SensorsTestActivity extends AppCompatActivity {
         });
 
         sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
-        sensors.startFrom(new float[]{0, 0, 0});
 
         sensors.orientationObservable.observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<SensorsSnapshot>() {
             @Override
@@ -94,6 +93,12 @@ public class SensorsTestActivity extends AppCompatActivity {
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        sensors.startRecording(true);
     }
 
     private float[] screenPoint(float[] center, float[] xyz) {

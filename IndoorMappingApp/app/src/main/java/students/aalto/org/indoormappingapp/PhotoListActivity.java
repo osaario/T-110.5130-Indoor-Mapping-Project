@@ -33,6 +33,7 @@ import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.model.Photo;
+import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 import students.aalto.org.indoormappingapp.services.ImageUpload;
 import students.aalto.org.indoormappingapp.services.NetworkService;
 
@@ -57,6 +58,8 @@ public class PhotoListActivity extends AppCompatActivity {
     private Subscription subscription;
     private ProgressDialog dialog;
 
+    SensorsFragment sensors;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -71,9 +74,10 @@ public class PhotoListActivity extends AppCompatActivity {
             bar.setDisplayHomeAsUpEnabled(true);
         }
 
+        sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
+
         //url is like this:
         // https://indoor-mapping-app-server.herokuapp.com/api/datasets/datasetID/locations/locationID/photos
-
 
         Intent intent = getIntent();
         /*
@@ -189,6 +193,7 @@ public class PhotoListActivity extends AppCompatActivity {
     }
 
     private void dispatchTakePictureIntent() {
+        sensors.startRecording(false);
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             capturedPhoto = new Photo("");
@@ -199,6 +204,8 @@ public class PhotoListActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        sensors.stopRecording();
+        Log.d("location", "recorded readings n=" + sensors.cache.count());
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             button.setEnabled(false);
 
