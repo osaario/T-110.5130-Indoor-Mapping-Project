@@ -22,6 +22,7 @@
     <string name="description">Description</string>
     <string name="save">Save</string>
     <string name="error_name">Name required</string>
+    <string name="error_description">Description required</string>
     <string name="error_connection">Network connection failed</string>
     <string name="title_activity_photo_list">Photos</string>
     <string name="title_activity_camera">CameraActivity</string>

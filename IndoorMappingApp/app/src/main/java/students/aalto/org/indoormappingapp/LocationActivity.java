@@ -60,15 +60,21 @@ public class LocationActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 EditText name = (EditText) findViewById(R.id.edit_name);
+                EditText description = (EditText) findViewById(R.id.edit_description);
+
                 if (name.getText().toString().matches("")) {
                     Toast.makeText(context, context.getResources().getString(R.string.error_name), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (description.getText().toString().matches("")) {
+                    Toast.makeText(context, context.getResources().getString(R.string.error_description), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 save.setEnabled(false);
                 name.setEnabled(false);
                 progress.setVisibility(View.VISIBLE);
-                createLocation(new Location(x, y, z, name.getText().toString(), ""));
+                createLocation(new Location(x, y, z, name.getText().toString(), description.getText().toString()));
             }
 
         });
