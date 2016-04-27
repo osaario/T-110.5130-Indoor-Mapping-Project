@@ -161,6 +161,12 @@ public class PhotoListActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_edit) {
+            Intent intent = new Intent(getBaseContext(), LocationEditActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
         if (id == R.id.action_delete) {
             Intent intent = new Intent(getBaseContext(), LocationListActivity.class);
             startActivity(intent);

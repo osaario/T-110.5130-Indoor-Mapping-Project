@@ -75,6 +75,7 @@ public class LocationActivity extends AppCompatActivity {
                 name.setEnabled(false);
                 progress.setVisibility(View.VISIBLE);
                 createLocation(new Location(x, y, z, name.getText().toString(), description.getText().toString()));
+
             }
 
         });
