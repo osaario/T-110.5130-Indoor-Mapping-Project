@@ -67,6 +67,10 @@ public class SensorsFragment extends Fragment implements SensorEventListener {
         super.onDestroyView();
     }
 
+    public void configureCache(int size, boolean noCycling) {
+        cache = new SensorsCache(size, noCycling);
+    }
+
     public void startRecording(boolean publishOrientation) {
         startRecording(publishOrientation, new float[] {0,0,0});
     }

@@ -33,6 +33,7 @@ import students.aalto.org.indoormappingapp.model.ApplicationState;
 import students.aalto.org.indoormappingapp.model.DataSet;
 import students.aalto.org.indoormappingapp.model.Location;
 import students.aalto.org.indoormappingapp.model.Photo;
+import students.aalto.org.indoormappingapp.model.Sensor;
 import students.aalto.org.indoormappingapp.sensors.SensorsFragment;
 import students.aalto.org.indoormappingapp.services.ImageUpload;
 import students.aalto.org.indoormappingapp.services.NetworkService;
@@ -75,6 +76,7 @@ public class PhotoListActivity extends AppCompatActivity {
         }
 
         sensors = (SensorsFragment) getSupportFragmentManager().findFragmentById(R.id.sensors_fragment);
+        sensors.configureCache(30, true);
 
         //url is like this:
         // https://indoor-mapping-app-server.herokuapp.com/api/datasets/datasetID/locations/locationID/photos
@@ -204,10 +206,11 @@ public class PhotoListActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        sensors.stopRecording();
-        Log.d("location", "recorded readings n=" + sensors.cache.count());
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             button.setEnabled(false);
+
+            sensors.stopRecording();
+            capturedPhoto.Sensor = new Sensor(sensors.cache.getList());
 
             dialog.setMessage(getString(R.string.sending));
             final Context context = this;

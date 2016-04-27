@@ -18,6 +18,8 @@ public class Sensor extends NetworkJSONObject {
     public String ToLocationID;
     public List<SensorsSnapshot> path;
 
+    public Sensor(List<SensorsSnapshot> path) { this(path, null, null); }
+
     public Sensor(List<SensorsSnapshot> path, Location to) {
         this(path, null, to);
     }
@@ -38,7 +40,9 @@ public class Sensor extends NetworkJSONObject {
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("created", toJSONDate(Created));
-        json.put("from", FromLocationID);
+        if (FromLocationID != null) {
+            json.put("from", FromLocationID);
+        }
 
         JSONArray timestamp = new JSONArray(),
                 xOrientation = new JSONArray(), yOrientation = new JSONArray(), zOrientation = new JSONArray(),
@@ -49,21 +53,21 @@ public class Sensor extends NetworkJSONObject {
         for (int i = 0; i < path.size(); i++) {
             SensorsSnapshot reading = path.get(i);
             timestamp.put(reading.Timestamp);
-            xOrientation.put(reading.Orientation[0]);
-            yOrientation.put(reading.Orientation[1]);
-            zOrientation.put(reading.Orientation[2]);
-            xGyroscope.put(reading.Gyroscope[0]);
-            yGyroscope.put(reading.Gyroscope[1]);
-            zGyroscope.put(reading.Gyroscope[2]);
-            xMagnetic.put(reading.Magnetic[0]);
-            yMagnetic.put(reading.Magnetic[1]);
-            zMagnetic.put(reading.Magnetic[2]);
-            xAccelerometer.put(reading.Accelerometer[0]);
-            yAccelerometer.put(reading.Accelerometer[1]);
-            zAccelerometer.put(reading.Accelerometer[2]);
-            xCoordinate.put(reading.Coordinate[0]);
-            yCoordinate.put(reading.Coordinate[1]);
-            zCoordinate.put(reading.Coordinate[2]);
+            xOrientation.put(reading.Orientation != null ? reading.Orientation[0] : 0);
+            yOrientation.put(reading.Orientation != null ? reading.Orientation[1] : 0);
+            zOrientation.put(reading.Orientation != null ? reading.Orientation[2] : 0);
+            xGyroscope.put(reading.Gyroscope != null ? reading.Gyroscope[0] : 0);
+            yGyroscope.put(reading.Gyroscope != null ? reading.Gyroscope[1] : 0);
+            zGyroscope.put(reading.Gyroscope != null ? reading.Gyroscope[2] : 0);
+            xMagnetic.put(reading.Magnetic != null ? reading.Magnetic[0] : 0);
+            yMagnetic.put(reading.Magnetic != null ? reading.Magnetic[1] : 0);
+            zMagnetic.put(reading.Magnetic != null ? reading.Magnetic[2] : 0);
+            xAccelerometer.put(reading.Accelerometer != null ? reading.Accelerometer[0] : 0);
+            yAccelerometer.put(reading.Accelerometer != null ? reading.Accelerometer[1] : 0);
+            zAccelerometer.put(reading.Accelerometer != null ? reading.Accelerometer[2] : 0);
+            xCoordinate.put(reading.Coordinate != null ? reading.Coordinate[0] : 0);
+            yCoordinate.put(reading.Coordinate != null ? reading.Coordinate[1] : 0);
+            zCoordinate.put(reading.Coordinate != null ? reading.Coordinate[2] : 0);
         }
         json.put("timestamp", timestamp);
         json.put("xOrientation", xOrientation);
